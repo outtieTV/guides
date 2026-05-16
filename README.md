@@ -287,5 +287,3 @@ set realmlist <YOUR_PUBLIC_IP>
 *Tip:* Keep the `screen` sessions running in the background, or set up systemd services for automatic start‑up after a reboot.  
 
 ---  
-
-*All scripts, patches, and the `get-modules.sh` helper are version‑controlled on your GitHub repository.*  
