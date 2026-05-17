@@ -14,7 +14,7 @@ repos=(
     https://github.com/DustinHendrickson/mod-player-bot-level-brackets
     https://github.com/Gozzim/mod-npc-spectator
     https://github.com/TerraByte-tbwps/mod-aoe-loot
-    https://github.com/ZhengPeiRu21/mod-challenge-modes
+    https://github.com/outtieTV/mod-challenge-modes-hotfix
     https://github.com/ZhengPeiRu21/mod-individual-progression
     https://github.com/ZhengPeiRu21/mod-leech
     https://github.com/ZhengPeiRu21/mod-reagent-bank
