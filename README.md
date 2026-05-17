@@ -226,7 +226,7 @@ INSERT INTO characters (
 
 ## Enable Modules (mod‑AHBot, etc.)
 
-1. Edit each module’s `.conf` file under `~/azerothcore-wotlk/modules/*/conf/`.
+1. Edit each module’s `.conf` file under `~/azerothcore-wotlk/env/dist/etc/modules`.
 2. Change `Enable = 0` → `Enable = 1` for the modules you want.
 3. In `mod-AHBot.conf` set the `BotAccountId` (or similar) to the **account_id** from step 11.  
 
