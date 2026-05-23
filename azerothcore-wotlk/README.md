@@ -32,7 +32,7 @@ git clone https://github.com/mod-playerbots/azerothcore-wotlk.git \
 cd ~/azerothcore-wotlk/modules
 
 # get‑modules.sh
-wget https://github.com/outtieTV/azerothcore-wotlk-guide/blob/main/get-modules.sh
+wget https://github.com/outtieTV/guides/blob/main/azerothcore-wotlk/get-modules.sh
 chmod +x get-modules.sh
 bash get-modules.sh
 
