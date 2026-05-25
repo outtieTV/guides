@@ -16,7 +16,7 @@ A complete server setup includes the following individual server components and 
 * **Coordinator**
 * **Channel Servers** (e.g., CH1, Housing Channel)
 * **NPCClient** (Game Loop Processing Engines for core channels)
-* **Messenger** (Typically ported/copied from G17)
+* **Messenger** (Typically ported/copied from G13)
 * **PHP Account Creator** *(Optional)*
 
 ---
