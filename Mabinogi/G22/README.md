@@ -151,7 +151,7 @@ Run this batch file to launch the game client and connect to your local server.
 
 ### 🔧 Additional Notes  
 
-* **Multiplayer DLL** – If you encounter multiplayer issues, replace `DINPUT8.dll` with the version from the **G20** release.  
+* **Multiplayer DLL** – If you encounter multiplayer issues, replace `DINPUT8.dll` with the version from the **G20** release. Or, just simply delete the dll. 
 * **Database connection strings** – Use **dnSpy** on `xmldb.exe` and `xmldb.dll` to view the embedded connection strings (e.g., database name, user, password).  
 * **MD5 hashing** – To generate the required uppercase MD5 hash for a password, you can use any online MD5 tool and then convert the result to uppercase, e.g.:
 
