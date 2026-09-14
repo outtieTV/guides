@@ -67,7 +67,7 @@ repos=(
     https://github.com/justin-kaufmann/mod-changeablespawnrates
     https://github.com/kjack9/mod-dead-means-dead
     https://github.com/noisiver/mod-junk-to-gold
-    https://github.com/noisiver/mod-learnspells
+    https://github.com/azerothcore/mod-learn-spells
     https://github.com/silviu20092/mod-improved-bank
 )
 
