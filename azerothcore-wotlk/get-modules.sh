@@ -46,7 +46,7 @@ repos=(
     https://github.com/azerothcore/mod-npc-talent-template
     https://github.com/azerothcore/mod-phased-duels
     https://github.com/azerothcore/mod-pvp-titles
-    https://github.com/azerothcore/mod-pvp-zones
+    https://github.com/outtieTV/mod-pvp-zones-hotfix
     https://github.com/azerothcore/mod-queue-list-cache
     https://github.com/azerothcore/mod-quick-teleport
     https://github.com/azerothcore/mod-racial-trait-swap
@@ -61,7 +61,7 @@ repos=(
     https://github.com/azerothcore/mod-war-effort
     https://github.com/azerothcore/mod-who-logged
     https://github.com/dunjeon/mod-TimeIsTime
-    https://github.com/hallgaeuer/mod-dynamic-loot-rates
+    https://github.com/outtieTV/mod-dynamic-loot-rates-hotfix
     https://github.com/hermensbas/mod_weather_vibe
     https://github.com/justin-kaufmann/mod-changeablespawnrates
     https://github.com/outtieTV/mod-dead-means-dead-hotfix
