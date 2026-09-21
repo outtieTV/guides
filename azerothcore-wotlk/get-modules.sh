@@ -7,7 +7,7 @@ set -euo pipefail
 # ------------------------------------------------------------------
 repos=(
     https://github.com/mod-playerbots/mod-playerbots
-    https://github.com/outtietv/BGQueueChecker
+    https://github.com/outtietv/BGQueueChecker-playerbots-hotfix
     https://github.com/BytesGalore/mod-no-hearthstone-cooldown
     https://github.com/DustinHendrickson/mod-ollama-chat
     https://github.com/DustinHendrickson/mod-player-bot-guildhouse
