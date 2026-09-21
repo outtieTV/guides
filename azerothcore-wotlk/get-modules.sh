@@ -11,7 +11,6 @@ repos=(
     https://github.com/BytesGalore/mod-no-hearthstone-cooldown
     https://github.com/DustinHendrickson/mod-ollama-chat
     https://github.com/DustinHendrickson/mod-player-bot-guildhouse
-    https://github.com/DustinHendrickson/mod-player-bot-level-brackets
     https://github.com/Gozzim/mod-npc-spectator
     https://github.com/TerraByte-tbwps/mod-aoe-loot
     https://github.com/outtieTV/mod-challenge-modes-hotfix
