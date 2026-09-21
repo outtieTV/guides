@@ -65,7 +65,7 @@ repos=(
     https://github.com/hallgaeuer/mod-dynamic-loot-rates
     https://github.com/hermensbas/mod_weather_vibe
     https://github.com/justin-kaufmann/mod-changeablespawnrates
-    https://github.com/kjack9/mod-dead-means-dead
+    https://github.com/outtieTV/mod-dead-means-dead-hotfix
     https://github.com/noisiver/mod-junk-to-gold
     https://github.com/azerothcore/mod-learn-spells
     https://github.com/silviu20092/mod-improved-bank
