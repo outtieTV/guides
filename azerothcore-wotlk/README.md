@@ -1193,26 +1193,18 @@ For a personal server, it is generally sufficient when performed carefully.
 Open the AHBot configuration:
 
 ```bash
-nano ~/azerothcore-wotlk/env/dist/etc/modules/mod-AHBot.conf
+nano ~/azerothcore-wotlk/env/dist/etc/modules/mod_ahbot.conf
 ```
 
-Set the appropriate bot account/character setting to the account ID created earlier.
+Set the appropriate bot character setting to the GUID created earlier.
 
 For example:
 
 ```text
-BotAccountId = 102
+AuctionHouseBot.GUIDs = 1
 ```
 
 The exact setting name can vary between AHBot versions.
-
-Search the file:
-
-```bash
-grep -i "account" ~/azerothcore-wotlk/env/dist/etc/modules/mod-AHBot.conf
-```
-
-Then verify the configuration against the version of the module you installed.
 
 Restart the worldserver after changing module configuration.
 
