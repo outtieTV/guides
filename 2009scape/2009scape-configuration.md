@@ -4,7 +4,7 @@ This document provides a detailed reference for the `default.conf` configuration
 
 It documents both:
 
-* The **actual default values** shipped with 2009Scape.
+* The **default values** shipped with 2009Scape.
 * Recommended values for a typical personal, development, or production server.
 
 > **Important:** The values under **Default** below are the original 2009Scape defaults. The **Recommended** values are configuration recommendations and are not necessarily the same as the upstream defaults.
