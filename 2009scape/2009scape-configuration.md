@@ -2,36 +2,18 @@
 
 This document provides a detailed reference for the `default.conf` configuration file used by the **2009Scape** server.
 
-The configuration controls:
+It documents both:
 
-* Server logging
-* Authentication
-* Account persistence
-* Database connectivity
-* WebSocket connectivity
-* Optional integrations
-* World identity
-* Bots
-* Grand Exchange behavior
-* PvP and Wilderness mechanics
-* Skills and progression
-* Random events
-* Custom gameplay features
-* Player saves
-* Server logs
-* Economy data
-* Drop tables
-* Other server data
+* The **actual default values** shipped with 2009Scape.
+* Recommended values for a typical personal, development, or production server.
 
-> **Configuration version:** This documentation is based on the `default.conf` structure supplied with the 2009Scape server.
->
-> **Important:** Configuration options can change between 2009Scape releases. If an option is added, removed, or renamed upstream, use the `default.conf` included with your version of the server as the authoritative reference.
+> **Important:** The values under **Default** below are the original 2009Scape defaults. The **Recommended** values are configuration recommendations and are not necessarily the same as the upstream defaults.
 
 ---
 
 # Table of Contents
 
-* [Configuration Conventions](#configuration-conventions)
+* [Understanding Defaults vs. Recommendations](#understanding-defaults-vs-recommendations)
 * [`[server]`](#server)
 
   * [`log_level`](#log_level)
@@ -46,11 +28,7 @@ The configuration controls:
   * [`watchdog_enabled`](#watchdog_enabled)
   * [`connectivity_check_url`](#connectivity_check_url)
   * [`connectivity_timeout`](#connectivity_timeout)
-  * [`websocket_enabled`](#websocket_enabled)
-  * [`websocket_port`](#websocket_port)
-  * [`websocket_tls_enabled`](#websocket_tls_enabled)
-  * [`websocket_tls_keystore_path`](#websocket_tls_keystore_path)
-  * [`websocket_tls_keystore_password`](#websocket_tls_keystore_password)
+  * [WebSocket Settings](#websocket-settings)
 * [`[database]`](#database)
 
   * [`database_name`](#database_name)
@@ -63,19 +41,21 @@ The configuration controls:
   * [`grafana_logging`](#grafana_logging)
   * [`grafana_log_path`](#grafana_log_path)
   * [`grafana_log_ttl_days`](#grafana_log_ttl_days)
-  * [Discord/OpenRSC Webhooks](#discordopenrsc-webhooks)
+  * [Discord and OpenRSC Webhooks](#discord-and-openrsc-webhooks)
 * [`[world]`](#world)
 
   * [World Identity](#world-identity)
-  * [Development Options](#development-options)
-  * [Player Settings](#player-settings)
+  * [Development Settings](#development-settings)
+  * [World and Membership Settings](#world-and-membership-settings)
+  * [Clan Settings](#clan-settings)
   * [Bot Settings](#bot-settings)
-  * [Grand Exchange](#grand-exchange)
+  * [Grand Exchange Settings](#grand-exchange-settings)
+  * [Gameplay Settings](#gameplay-settings)
   * [PvP and Wilderness](#pvp-and-wilderness)
-  * [Gameplay Modifications](#gameplay-modifications)
   * [Random Events](#random-events)
   * [Skills and Progression](#skills-and-progression)
   * [Custom Content](#custom-content)
+  * [Player Features](#player-features)
 * [`[paths]`](#paths)
 
   * [`data_path`](#data_path)
@@ -89,50 +69,62 @@ The configuration controls:
   * [`logs_path`](#logs_path)
   * [`bot_data`](#bot_data)
   * [`eco_data`](#eco_data)
-* [Development Configuration](#development-configuration)
+* [Recommended Configuration](#recommended-configuration)
 * [Production Configuration](#production-configuration)
+* [Important Security Considerations](#important-security-considerations)
 * [Backup Recommendations](#backup-recommendations)
+* [Quick Reference](#quick-reference)
 
 ---
 
-# Configuration Conventions
+# Understanding Defaults vs. Recommendations
 
-The configuration uses several basic value types.
+There are two different concepts used throughout this guide.
 
-| Type       | Example                | Description                   |
-| ---------- | ---------------------- | ----------------------------- |
-| Boolean    | `true` / `false`       | Enables or disables a feature |
-| String     | `"2009Scape"`          | Text or path value            |
-| Integer    | `100`                  | Whole-number value            |
-| Coordinate | `"3094,3107,0"`        | X, Y, Plane                   |
-| Path       | `"@data/logs"`         | File-system path              |
-| URL        | `"https://google.com"` | Internet address              |
+## Default
 
-## Boolean values
+**Default** means the value shipped in the standard 2009Scape `default.conf`.
 
-Boolean settings generally use:
+These values are intended to provide a basic development/testing configuration.
 
-```ini
-true
-```
-
-or:
-
-```ini
-false
-```
+The default configuration intentionally leaves several security and convenience features disabled.
 
 For example:
 
 ```ini
-enable_bots = true
+use_auth = false
+persist_accounts = false
+debug = true
+dev = true
 ```
+
+These are valid development defaults, but they should not automatically be interpreted as production recommendations.
+
+---
+
+## Recommended
+
+**Recommended** means a suggested configuration for a more usable or secure server.
+
+For example, the default configuration contains:
+
+```ini
+use_auth = false
+```
+
+while the recommended configuration is:
+
+```ini
+use_auth = true
+```
+
+This is because password authentication should be enabled when operating a real/public server.
 
 ---
 
 # `[server]`
 
-The `[server]` section controls core server functionality, logging, authentication, connectivity, and WebSocket support.
+The `[server]` section controls core server behavior, logging, authentication, networking, and WebSocket support.
 
 ---
 
@@ -144,33 +136,73 @@ log_level = "verbose"
 
 **Type:** String
 **Default:** `verbose`
-**Recommended:** `verbose` during development; `detailed` or `cautious` for quieter production logs
-**Requires restart:** Yes
+**Recommended:** `verbose` for development; `detailed` for a quieter production server
+**Restart required:** Yes
 
 ### Description
 
-Controls the amount of information written to the server log.
+Controls the amount of information written to the server logs.
 
-Available levels:
+There are four supported levels:
 
-| Level      | Behavior                         |
-| ---------- | -------------------------------- |
-| `verbose`  | Shows all available logs         |
-| `detailed` | Hides `FINE` messages            |
-| `cautious` | Hides `FINE` and `INFO` messages |
-| `silent`   | Shows only errors                |
+| Level      | Description                                                    |
+| ---------- | -------------------------------------------------------------- |
+| `verbose`  | All logs are shown                                             |
+| `detailed` | `FINE` logs are hidden                                         |
+| `cautious` | `FINE` and `INFO` logs are hidden; warnings and errors remain  |
+| `silent`   | `FINE`, `INFO`, and `WARN` logs are hidden; only errors remain |
 
-### Recommended development value
+### `verbose`
 
 ```ini
 log_level = "verbose"
 ```
 
-This is particularly useful while troubleshooting scripts, database problems, networking, or gameplay issues.
+Displays the greatest amount of information.
 
-### Production considerations
+This is useful when:
 
-A less verbose level can substantially reduce log volume on a busy server.
+* Developing the server
+* Debugging scripts
+* Investigating crashes
+* Troubleshooting networking
+* Investigating database problems
+
+### `detailed`
+
+```ini
+log_level = "detailed"
+```
+
+Hides the most verbose `FINE` messages while retaining more useful operational information.
+
+### `cautious`
+
+```ini
+log_level = "cautious"
+```
+
+Only shows warnings and errors.
+
+### `silent`
+
+```ini
+log_level = "silent"
+```
+
+Only displays errors.
+
+### Recommendation
+
+For development, keeping:
+
+```ini
+log_level = "verbose"
+```
+
+is useful.
+
+For a busy production server, `detailed` or `cautious` can reduce log volume.
 
 ---
 
@@ -182,14 +214,16 @@ secret_key = "2009scape_development"
 
 **Type:** String
 **Default:** `2009scape_development`
-**Recommended:** Keep client and server values synchronized
-**Requires restart:** Yes
+**Recommended:** Keep the client and server values synchronized; use a unique secret where appropriate
+**Restart required:** Yes
 
 ### Description
 
-The secret key is sent by the client during the login process.
+The secret key is sent by the client during login.
 
-The **client and server must have matching secret keys**. If the keys do not match, the connection is refused.
+The **client and server must use matching values**.
+
+If the values do not match, the client connection will be refused.
 
 Example:
 
@@ -197,11 +231,11 @@ Example:
 secret_key = "2009scape_development"
 ```
 
-### Important
+The corresponding client configuration must contain the same key.
 
-Changing this value requires the corresponding client configuration to use the same value.
+### Security
 
-Do not accidentally change the server key without changing the client.
+If this server is exposed publicly, avoid treating the development key as a strong secret. Anyone who has access to the client configuration may be able to recover the key.
 
 ---
 
@@ -214,11 +248,11 @@ write_logs = true
 **Type:** Boolean
 **Default:** `true`
 **Recommended:** `true`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Controls whether server logs are written to disk.
+Controls whether logs are written to disk.
 
 When enabled:
 
@@ -226,7 +260,13 @@ When enabled:
 write_logs = true
 ```
 
-logs can be examined after the server has stopped.
+the server writes persistent log files.
+
+The location is controlled by:
+
+```ini
+logs_path = "@data/logs"
+```
 
 When disabled:
 
@@ -234,13 +274,11 @@ When disabled:
 write_logs = false
 ```
 
-the server does not persist its normal logs to disk.
+persistent log files are not written.
 
-The location of log files is controlled by:
+### Recommendation
 
-```ini
-logs_path = "@data/logs"
-```
+Leave this enabled unless there is a specific reason to disable disk logging.
 
 ---
 
@@ -250,24 +288,24 @@ logs_path = "@data/logs"
 msip = "127.0.0.1"
 ```
 
-**Type:** String/IP address
+**Type:** IP address
 **Default:** `127.0.0.1`
 **Recommended:** `127.0.0.1` for a local installation
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Specifies the management/server IP address.
+Specifies the server/management IP address.
 
 `127.0.0.1` is the IPv4 loopback address and refers to the local machine.
 
-For a normal single-machine installation:
+For a server where the relevant services are running on the same machine:
 
 ```ini
 msip = "127.0.0.1"
 ```
 
-is generally appropriate.
+is normally appropriate.
 
 ---
 
@@ -279,14 +317,14 @@ preload_map = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` unless additional memory is available
-**Requires restart:** Yes
+**Recommended:** `false` unless sufficient RAM is available
+**Restart required:** Yes
 
 ### Description
 
-Controls whether map data is preloaded into memory.
+Controls whether the map is preloaded into memory.
 
-The configuration notes that enabling this option increases memory usage by approximately **2 GB**, while potentially making game ticks smoother.
+The 2009Scape configuration notes that enabling this option increases memory usage by approximately **2 GB**, but can make game ticks smoother.
 
 ### Disabled
 
@@ -294,11 +332,7 @@ The configuration notes that enabling this option increases memory usage by appr
 preload_map = false
 ```
 
-Advantages:
-
-* Lower memory usage
-* Lower startup memory requirements
-* Better suited to smaller servers
+Uses less memory.
 
 ### Enabled
 
@@ -306,38 +340,44 @@ Advantages:
 preload_map = true
 ```
 
-Advantages:
+Loads map data ahead of time.
 
-* More map data is immediately available
-* Can reduce map-loading-related delays
-* May improve game-tick smoothness
+This can improve responsiveness at the cost of increased memory usage.
 
 ### Recommendation
 
-For a development server or machine with limited RAM:
+For a development server or a machine with limited RAM:
 
 ```ini
 preload_map = false
 ```
 
-For a dedicated server with sufficient memory, testing `true` may be worthwhile.
+A dedicated server with plenty of RAM can test:
+
+```ini
+preload_map = true
+```
+
+to determine whether the smoother game ticks are worthwhile.
 
 ---
+
+# Authentication and Account Settings
 
 ## `use_auth`
 
 ```ini
-use_auth = true
+use_auth = false
 ```
 
 **Type:** Boolean
-**Default:** `true`
+**Default:** `false`
 **Recommended:** `true`
-**Requires restart:** Yes
+**Production:** **Must be `true`**
 
 ### Description
 
-Controls whether player passwords are actually checked during login.
+Controls whether login passwords are checked.
 
 When enabled:
 
@@ -345,7 +385,7 @@ When enabled:
 use_auth = true
 ```
 
-the supplied password must match the stored password.
+the player's supplied password must match the stored password.
 
 Passwords are hashed before being stored.
 
@@ -355,55 +395,78 @@ When disabled:
 use_auth = false
 ```
 
-the server does not require the supplied password to be correct.
+the server does not care whether the supplied password is correct.
 
-### Production
+### Important
 
-**This should be `true` on a production server.**
+The upstream default is intentionally:
+
+```ini
+use_auth = false
+```
+
+because the default configuration is intended primarily for development.
+
+For a production server:
+
+```ini
+use_auth = true
+```
+
+should be used.
 
 ---
 
 ## `persist_accounts`
 
 ```ini
-persist_accounts = true
+persist_accounts = false
 ```
 
 **Type:** Boolean
-**Default:** `true`
+**Default:** `false`
 **Recommended:** `true`
-**Requires restart:** Yes
+**Production:** **Must be `true`**
 
 ### Description
 
 Controls whether account-level information is persisted.
 
-This includes information such as:
+Examples include:
 
 * Credits
 * Playtime
-* Other account-level data
+* Other account-level information
 
 ### Important distinction
 
-This setting does **not** control normal character save data such as:
+This setting does **not** control actual player save data.
+
+It does not determine whether things such as the following are saved:
 
 * Skills
 * Inventory
 * Equipment
 * Character progression
+* Other gameplay data
 
-Those are handled separately by the player save system.
+Those are handled by the player save system.
 
-### Production
+### Default
 
-Use:
+```ini
+persist_accounts = false
+```
+
+Account-level data is temporary.
+
+### Recommended
 
 ```ini
 persist_accounts = true
 ```
 
-for a production server.
+Account-level data is persisted.
 
 ---
 
@@ -416,11 +479,11 @@ noauth_default_admin = true
 **Type:** Boolean
 **Default:** `true`
 **Recommended:** `false` for public servers
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Determines whether players are treated as administrators when authentication is disabled.
+Determines whether players are administrators when authentication is disabled.
 
 This option is primarily relevant when:
 
@@ -428,18 +491,18 @@ This option is primarily relevant when:
 use_auth = false
 ```
 
-A development configuration might use:
+The default development configuration uses:
 
 ```ini
 use_auth = false
 noauth_default_admin = true
 ```
 
-This can make testing convenient.
+This can be convenient when developing or testing the server.
 
 ### Security warning
 
-Never combine unrestricted no-authentication access with public Internet access unless you intentionally want every connecting player to receive administrative privileges.
+Do **not** expose an unauthenticated server publicly while giving unauthenticated users administrator privileges.
 
 For a production server:
 
@@ -448,71 +511,87 @@ use_auth = true
 noauth_default_admin = false
 ```
 
-is the safer configuration.
+is strongly preferable.
 
 ---
 
 ## `daily_accounts_per_ip`
 
 ```ini
-daily_accounts_per_ip = 9999
+daily_accounts_per_ip = 3
 ```
 
 **Type:** Integer
-**Default:** `9999` in the supplied configuration
-**Recommended:** Depends on server policy
-**Requires restart:** Yes
+**Default:** `3`
+**Recommended:** Depends on server policy; `9999` removes the practical restriction
+**Restart required:** Yes
 
 ### Description
 
-Controls the maximum number of different accounts that a single IP address may log into during a day.
+Controls the number of different accounts that can be logged into from the same IP address during a day.
 
-Example:
+The default is:
 
 ```ini
-daily_accounts_per_ip = 5
+daily_accounts_per_ip = 3
 ```
 
-would permit five different accounts from the same IP during the applicable period.
+For example, an IP could normally log into three different accounts under the default limit.
 
-A value of:
+A high value such as:
 
 ```ini
 daily_accounts_per_ip = 9999
 ```
 
-effectively makes the restriction extremely high.
+effectively removes the practical restriction.
 
 ### Considerations
 
-This can help limit:
+IP-based limits can affect multiple legitimate players who share an Internet connection.
 
-* Large-scale account creation
-* Account abuse
-* Automated account activity
+Examples include:
 
-However, legitimate users behind shared networks may also share an IP address.
+* Families
+* Schools
+* Dormitories
+* Offices
+* Public networks
+* VPNs
+* Carrier-grade NAT
 
 ---
 
 ## `watchdog_enabled`
 
 ```ini
-watchdog_enabled = true
+watchdog_enabled = false
 ```
 
 **Type:** Boolean
-**Default:** `true`
+**Default:** `false`
 **Recommended:** `true`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Enables the server watchdog.
+Controls whether the server watchdog is enabled.
 
-The watchdog monitors server operation and can detect situations where the server becomes unresponsive or unhealthy.
+The watchdog can monitor server operation and help identify situations where the server becomes unresponsive.
 
-Leaving it enabled is generally appropriate for a long-running server.
+### Default
+
+```ini
+watchdog_enabled = false
+```
+
+### Recommended
+
+```ini
+watchdog_enabled = true
+```
+
+For a long-running server, enabling the watchdog can provide additional protection and monitoring.
 
 ---
 
@@ -523,21 +602,21 @@ connectivity_check_url = "https://google.com,https://2009scape.org"
 ```
 
 **Type:** Comma-separated URL list
-**Default:** Configuration-dependent
-**Recommended:** Use reliable external endpoints
-**Requires restart:** Yes
+**Default:** `https://google.com,https://2009scape.org`
+**Recommended:** Use reliable endpoints
+**Restart required:** Yes
 
 ### Description
 
-Specifies URLs used to check external connectivity.
+Specifies URLs used for connectivity checks.
 
-Multiple URLs can be supplied by separating them with commas:
+Multiple URLs are separated by commas:
 
 ```ini
 connectivity_check_url = "https://google.com,https://2009scape.org"
 ```
 
-Using multiple endpoints can help avoid relying entirely on one external service.
+Using multiple endpoints can reduce dependence on a single external service.
 
 ---
 
@@ -549,31 +628,29 @@ connectivity_timeout = 500
 
 **Type:** Integer
 **Unit:** Milliseconds
-**Default:** `500` in the supplied configuration
-**Recommended:** `500` or higher for slower networks
-**Requires restart:** Yes
+**Default:** `500`
+**Recommended:** `500` or higher depending on network conditions
+**Restart required:** Yes
 
 ### Description
 
-Specifies how long the connectivity check waits for a response.
+Controls how long the server waits for a connectivity check.
 
-For example:
+The default:
 
 ```ini
 connectivity_timeout = 500
 ```
 
-represents a 500 millisecond timeout.
-
-Increasing this value gives slower connections more time to respond.
+means the timeout is 500 milliseconds.
 
 ---
 
 # WebSocket Settings
 
-The WebSocket system allows browser-based clients to communicate with the server.
+The WebSocket system allows browser-based clients to connect to the server.
 
-The WebSocket transport carries the same raw binary protocol used by the TCP connection, with WebSocket binary frames treated as byte chunks.
+The WebSocket transport carries the same raw binary protocol as TCP. Each WebSocket binary frame is treated as a byte chunk.
 
 ---
 
@@ -585,26 +662,16 @@ websocket_enabled = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` unless using a browser client
-**Requires restart:** Yes
+**Recommended:** `false` unless using browser clients
+**Restart required:** Yes
 
 ### Description
 
 Enables the WebSocket listener.
 
-Disabled:
+For normal clients that connect through TCP, this can remain disabled.
 
-```ini
-websocket_enabled = false
-```
-
-Enabled:
-
-```ini
-websocket_enabled = true
-```
-
-Browser-based clients generally require this transport because browsers cannot establish arbitrary raw TCP connections.
+Browser clients may require WebSocket support.
 
 ---
 
@@ -617,19 +684,19 @@ websocket_port = 0
 **Type:** Integer
 **Default:** `0`
 **Recommended:** `0` unless a fixed port is required
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Controls the WebSocket listening port.
+Controls which port the WebSocket listener uses.
 
-A value of:
+When set to:
 
 ```ini
 websocket_port = 0
 ```
 
-causes the server to calculate the port automatically:
+the server automatically uses:
 
 ```text
 53594 + world_id
@@ -648,7 +715,7 @@ results in:
 53595
 ```
 
-A specific port can also be assigned:
+A specific port can also be supplied:
 
 ```ini
 websocket_port = 55000
@@ -664,38 +731,26 @@ websocket_tls_enabled = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `true` for public browser deployments using TLS
-**Requires restart:** Yes
+**Recommended:** `true` when publicly serving browser clients over TLS
+**Restart required:** Yes
 
 ### Description
 
-Enables TLS encryption for WebSocket connections.
+Enables TLS encryption for the WebSocket listener.
 
-Disabled:
-
-```ini
-websocket_tls_enabled = false
-```
-
-uses:
+Without TLS:
 
 ```text
 ws://
 ```
 
-Enabled:
-
-```ini
-websocket_tls_enabled = true
-```
-
-uses:
+With TLS:
 
 ```text
 wss://
 ```
 
-For a browser client served from HTTPS, secure WebSockets (`wss://`) are generally required.
+For browser clients operating through HTTPS, secure WebSockets are generally appropriate.
 
 ---
 
@@ -705,14 +760,14 @@ For a browser client served from HTTPS, secure WebSockets (`wss://`) are general
 websocket_tls_keystore_path = ""
 ```
 
-**Type:** String/path
+**Type:** Path
 **Default:** Empty
-**Recommended:** Required when TLS is enabled
-**Requires restart:** Yes
+**Recommended:** Configure when WebSocket TLS is enabled
+**Restart required:** Yes
 
 ### Description
 
-Specifies the PKCS#12 (`.p12`) keystore containing the certificate and private key used by the WebSocket TLS listener.
+Specifies the PKCS#12 keystore containing the TLS certificate and private key.
 
 Example:
 
@@ -730,14 +785,14 @@ websocket_tls_keystore_password = ""
 
 **Type:** String
 **Default:** Empty
-**Recommended:** Use a protected password when applicable
-**Requires restart:** Yes
+**Recommended:** Use a password-protected keystore where appropriate
+**Restart required:** Yes
 
 ### Description
 
 Specifies the password used to open the PKCS#12 keystore.
 
-For a PKCS#12 file exported without a password, this can remain empty:
+If the PKCS#12 file was exported with an empty password, this can remain:
 
 ```ini
 websocket_tls_keystore_password = ""
@@ -747,7 +802,9 @@ websocket_tls_keystore_password = ""
 
 # `[database]`
 
-The `[database]` section controls the SQL database connection.
+The `[database]` section controls the MySQL/MariaDB connection used by the server.
+
+The supplied default assumes a database server running locally on the standard MySQL port.
 
 ---
 
@@ -758,13 +815,13 @@ database_name = "global"
 ```
 
 **Type:** String
-**Default:** `global` in the supplied configuration
-**Recommended:** Database containing the 2009Scape schema
-**Requires restart:** Yes
+**Default:** `global`
+**Recommended:** The database containing the 2009Scape schema
+**Restart required:** Yes
 
 ### Description
 
-Specifies the database/schema the server uses.
+Specifies the database/schema the server connects to.
 
 Example:
 
@@ -772,7 +829,7 @@ Example:
 database_name = "global"
 ```
 
-The database must already exist and contain the required 2009Scape database structure.
+The specified database must contain the required 2009Scape database structure.
 
 ---
 
@@ -783,29 +840,31 @@ database_username = "root"
 ```
 
 **Type:** String
-**Default:** `root` in the supplied configuration
-**Recommended:** Dedicated 2009Scape database account
-**Requires restart:** Yes
+**Default:** `root`
+**Recommended:** A dedicated database user
+**Restart required:** Yes
 
 ### Description
 
-Specifies the SQL account used by the server.
+Specifies the database username.
 
-The supplied default uses:
+The default configuration uses:
 
 ```ini
 database_username = "root"
 ```
 
-For production, a dedicated account is preferable.
+This is convenient for local development but is not ideal for a production server.
 
-For example:
+### Recommended production approach
+
+Create a dedicated database account:
 
 ```ini
 database_username = "2009scape"
 ```
 
-This limits the privileges available to the application.
+and grant that account only the permissions it requires.
 
 ---
 
@@ -817,21 +876,22 @@ database_password = ""
 
 **Type:** String
 **Default:** Empty
-**Recommended:** Strong password
-**Requires restart:** Yes
+**Recommended:** Strong password for production
+**Restart required:** Yes
 
 ### Description
 
-Specifies the SQL account password.
+Specifies the password for the database account.
 
-Example:
+The default is empty:
 
 ```ini
-database_username = "2009scape"
-database_password = "strong-password-here"
+database_password = ""
 ```
 
-Avoid leaving the database account password empty on a production server.
+This is convenient for local development installations.
+
+A production database account should normally have a password.
 
 ---
 
@@ -843,20 +903,22 @@ database_address = "127.0.0.1"
 
 **Type:** IP address/hostname
 **Default:** `127.0.0.1`
-**Recommended:** `127.0.0.1` for local database
-**Requires restart:** Yes
+**Recommended:** `127.0.0.1` for a local database
+**Restart required:** Yes
 
 ### Description
 
-Specifies the machine running MySQL/MariaDB.
+Specifies the host running the database server.
 
-For a local database:
+For a database running on the same computer:
 
 ```ini
 database_address = "127.0.0.1"
 ```
 
-For a remote database:
+For a remote database, an IP address or hostname can be used.
+
+Example:
 
 ```ini
 database_address = "192.168.1.50"
@@ -870,14 +932,14 @@ database_address = "192.168.1.50"
 database_port = "3306"
 ```
 
-**Type:** String/integer port
+**Type:** Port
 **Default:** `3306`
-**Recommended:** `3306` unless your database uses another port
-**Requires restart:** Yes
+**Recommended:** `3306` unless MySQL/MariaDB uses another port
+**Restart required:** Yes
 
 ### Description
 
-Specifies the SQL server's TCP port.
+Specifies the TCP port used by the database.
 
 The standard MySQL/MariaDB port is:
 
@@ -889,7 +951,7 @@ The standard MySQL/MariaDB port is:
 
 # `[integrations]`
 
-This section contains optional external integrations.
+The `[integrations]` section contains optional integrations with external services.
 
 ---
 
@@ -901,14 +963,14 @@ grafana_logging = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` unless using Grafana logging
-**Requires restart:** Yes
+**Recommended:** `false` unless using Grafana
+**Restart required:** Yes
 
 ### Description
 
-Enables logging intended for Grafana-based monitoring.
+Enables Grafana-compatible logging.
 
-If Grafana logging is not being used:
+If Grafana is not being used:
 
 ```ini
 grafana_logging = false
@@ -926,12 +988,12 @@ grafana_log_path = "@data/logs"
 
 **Type:** Path
 **Default:** `@data/logs`
-**Recommended:** Keep inside the server data directory
-**Requires restart:** Yes
+**Recommended:** `@data/logs`
+**Restart required:** Yes
 
 ### Description
 
-Specifies where Grafana-related logs are stored.
+Specifies where Grafana logging data is stored.
 
 With:
 
@@ -939,7 +1001,13 @@ With:
 data_path = "data"
 ```
 
-the path resolves to:
+the following:
+
+```ini
+grafana_log_path = "@data/logs"
+```
+
+resolves to:
 
 ```text
 data/logs
@@ -957,27 +1025,27 @@ grafana_log_ttl_days = 7
 **Unit:** Days
 **Default:** `7`
 **Recommended:** Depends on required history
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Controls how long Grafana log data is retained.
+Controls how many days of old Grafana log data are retained.
 
-Data older than the configured number of days is pruned during server startup.
+Data older than the configured value is pruned once during server startup.
 
-Example:
+For example:
 
 ```ini
 grafana_log_ttl_days = 30
 ```
 
-keeps approximately 30 days of data.
+would retain approximately 30 days of data.
 
 ---
 
-# Discord/OpenRSC Webhooks
+# Discord and OpenRSC Webhooks
 
-The configuration contains optional webhook integrations:
+The following integrations are included but commented out by default:
 
 ```ini
 #discord_ge_webhook = "webhook link"
@@ -985,26 +1053,23 @@ The configuration contains optional webhook integrations:
 #openrsc_integration_webhook = "webhook link"
 ```
 
-**Type:** URL
-**Default:** Disabled/commented out
-**Recommended:** Leave disabled unless required
-**Requires restart:** Yes
+These can be configured if the associated integrations are being used.
 
 ### `discord_ge_webhook`
 
-Can be used for supported Grand Exchange notifications.
+Used for supported Grand Exchange Discord notifications.
 
 ### `discord_moderation_webhook`
 
-Can be used for supported moderation notifications.
+Used for supported moderation Discord notifications.
 
 ### `openrsc_integration_webhook`
 
-Can be used for supported OpenRSC integration.
+Used for supported OpenRSC integration.
 
 ### Security
 
-Webhook URLs should be treated as credentials.
+Webhook URLs should be treated as secrets.
 
 Do not commit active webhook URLs to a public GitHub repository.
 
@@ -1012,7 +1077,7 @@ Do not commit active webhook URLs to a public GitHub repository.
 
 # `[world]`
 
-The `[world]` section controls the actual game world.
+The `[world]` section controls the identity and gameplay behavior of the 2009Scape world.
 
 ---
 
@@ -1026,20 +1091,20 @@ name = "2009Scape"
 
 **Type:** String
 **Default:** `2009Scape`
-**Recommended:** `2009Scape` for the standard server name
-**Requires restart:** Yes
+**Recommended:** `2009Scape`
+**Restart required:** Yes
 
 ### Description
 
 Specifies the name of the game world.
 
-The standard/default world name is:
+The standard world name is:
 
 ```ini
 name = "2009Scape"
 ```
 
-This name is used by systems that refer to the world.
+This value is also referenced by other configuration features using the `@name` placeholder.
 
 ---
 
@@ -1052,100 +1117,17 @@ name_ge = "2009Scape"
 **Type:** String
 **Default:** `2009Scape`
 **Recommended:** Match `name` unless intentionally different
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Specifies the world name used in Grand Exchange announcements involving bots selling items.
+Specifies the name used in Grand Exchange announcements for bots selling items.
 
-For the standard configuration:
+The standard configuration uses:
 
 ```ini
-name = "2009Scape"
 name_ge = "2009Scape"
 ```
-
----
-
-## `debug`
-
-```ini
-debug = false
-```
-
-**Type:** Boolean
-**Default:** `false`
-**Recommended:** `false` in production
-**Requires restart:** Yes
-
-### Description
-
-Enables debugging functionality.
-
-Useful during development and troubleshooting, but generally unnecessary during normal operation.
-
----
-
-## `dev`
-
-```ini
-dev = false
-```
-
-**Type:** Boolean
-**Default:** `false`
-**Recommended:** `false` in production
-**Requires restart:** Yes
-
-### Description
-
-Enables development-oriented server behavior.
-
-This should normally remain disabled on a public server.
-
----
-
-## `start_gui`
-
-```ini
-start_gui = false
-```
-
-**Type:** Boolean
-**Default:** `false`
-**Recommended:** `false` for headless servers
-**Requires restart:** Yes
-
-### Description
-
-Controls whether the server starts its graphical interface.
-
-For command-line/server-hosting environments:
-
-```ini
-start_gui = false
-```
-
-is generally appropriate.
-
----
-
-## `daily_restart`
-
-```ini
-daily_restart = true
-```
-
-**Type:** Boolean
-**Default:** `true`
-**Recommended:** `true` for long-running servers
-**Requires restart:** Yes
-
-### Description
-
-Enables the server's daily restart behavior.
-
-A daily restart can provide a predictable maintenance cycle and help clear accumulated runtime state.
 
 ---
 
@@ -1157,20 +1139,20 @@ world_id = "1"
 
 **Type:** String/integer
 **Default:** `1`
-**Recommended:** Unique ID for each world
-**Requires restart:** Yes
+**Recommended:** Unique ID for the world
+**Restart required:** Yes
 
 ### Description
 
 Specifies the world number.
 
-For the default world:
+The default world is:
 
 ```ini
 world_id = "1"
 ```
 
-The world ID can also affect automatically calculated ports.
+The world ID is also used by the automatic WebSocket port calculation.
 
 ---
 
@@ -1182,12 +1164,12 @@ country_id = "0"
 
 **Type:** String/integer
 **Default:** `0`
-**Recommended:** Use the appropriate world-list value
-**Requires restart:** Yes
+**Recommended:** Appropriate world-list value
+**Restart required:** Yes
 
 ### Description
 
-Identifies the country/region associated with the world in world-list metadata.
+Specifies the country/region identifier associated with the world.
 
 ---
 
@@ -1198,9 +1180,9 @@ members = true
 ```
 
 **Type:** Boolean
-**Default:** `true` in the supplied configuration
-**Recommended:** Depends on world design
-**Requires restart:** Yes
+**Default:** `true`
+**Recommended:** Depends on intended world type
+**Restart required:** Yes
 
 ### Description
 
@@ -1216,16 +1198,155 @@ activity = "2009Scape Classic."
 
 **Type:** String
 **Default:** `2009Scape Classic.`
-**Recommended:** Describe the world accurately
-**Requires restart:** Yes
+**Recommended:** Accurately describe the world
+**Restart required:** Yes
 
 ### Description
 
-Text displayed as the world's activity/status in the world list.
+Text displayed as the world's activity in the world list.
 
 ---
 
-# Player Settings
+## `pvp`
+
+```ini
+pvp = false
+```
+
+**Type:** Boolean
+**Default:** `false`
+**Recommended:** Depends on world type
+**Restart required:** Yes
+
+### Description
+
+Controls whether the world is configured as a PvP world.
+
+---
+
+# Development Settings
+
+## `debug`
+
+```ini
+debug = true
+```
+
+**Type:** Boolean
+**Default:** `true`
+**Recommended:** `false` for production
+**Restart required:** Yes
+
+### Description
+
+Enables debugging behavior.
+
+The upstream default is:
+
+```ini
+debug = true
+```
+
+This reflects the fact that the default configuration is primarily intended for development.
+
+For a production server:
+
+```ini
+debug = false
+```
+
+is recommended.
+
+---
+
+## `dev`
+
+```ini
+dev = true
+```
+
+**Type:** Boolean
+**Default:** `true`
+**Recommended:** `false` for production
+**Restart required:** Yes
+
+### Description
+
+Enables development-oriented behavior.
+
+The default is:
+
+```ini
+dev = true
+```
+
+For normal public operation:
+
+```ini
+dev = false
+```
+
+should be used unless a specific development feature requires otherwise.
+
+---
+
+## `start_gui`
+
+```ini
+start_gui = false
+```
+
+**Type:** Boolean
+**Default:** `false`
+**Recommended:** `false` for headless servers
+**Restart required:** Yes
+
+### Description
+
+Controls whether the server starts with its graphical interface.
+
+For a command-line or dedicated server:
+
+```ini
+start_gui = false
+```
+
+is appropriate.
+
+---
+
+## `daily_restart`
+
+```ini
+daily_restart = false
+```
+
+**Type:** Boolean
+**Default:** `false`
+**Recommended:** `true` for a long-running production server
+**Restart required:** Yes
+
+### Description
+
+Controls whether the server performs its daily restart behavior.
+
+The upstream default is:
+
+```ini
+daily_restart = false
+```
+
+A production server may benefit from enabling:
+
+```ini
+daily_restart = true
+```
+
+to establish a predictable restart cycle.
+
+---
+
+# Clan Settings
 
 ## `enable_default_clan`
 
@@ -1235,137 +1356,29 @@ enable_default_clan = true
 
 **Type:** Boolean
 **Default:** `true`
-**Recommended:** Depends on whether the default clan has been configured
-**Requires restart:** Yes
+**Recommended:** Depends on whether the default clan is configured
+**Restart required:** Yes
 
 ### Description
 
 Enables a default clan that players can automatically join.
 
-The configured world name is relevant because the configuration expects an account with the same name as `@name` to have an appropriate clan configured.
+The account must use the same name as the configured world `name`.
 
-For the default configuration:
+With:
 
 ```ini
 name = "2009Scape"
 enable_default_clan = true
 ```
 
----
-
-## `new_player_location`
-
-```ini
-new_player_location = "3094,3107,0"
-```
-
-**Type:** Coordinate string
-**Default:** `3094,3107,0`
-**Recommended:** Desired Tutorial Island/new-player spawn
-**Requires restart:** Yes
-
-### Format
+the relevant account should be named:
 
 ```text
-X,Y,Plane
+2009Scape
 ```
 
-Example:
-
-```text
-3094,3107,0
-```
-
----
-
-## `home_location`
-
-```ini
-home_location = "3222,3218,0"
-```
-
-**Type:** Coordinate string
-**Default:** `3222,3218,0`
-**Recommended:** Desired home-teleport destination
-**Requires restart:** Yes
-
-### Format
-
-```text
-X,Y,Plane
-```
-
----
-
-## `show_rules`
-
-```ini
-show_rules = true
-```
-
-**Type:** Boolean
-**Default:** `true`
-**Recommended:** `true`
-**Requires restart:** Yes
-
-### Description
-
-Displays the server rules the first time a player logs in.
-
-This is particularly useful for custom servers with additional rules.
-
----
-
-## `new_player_announcement`
-
-```ini
-new_player_announcement = true
-```
-
-**Type:** Boolean
-**Default:** `true`
-**Recommended:** Depends on desired chat behavior
-**Requires restart:** Yes
-
-### Description
-
-Controls announcements for newly arriving players.
-
----
-
-## `enable_global_chat`
-
-```ini
-enable_global_chat = true
-```
-
-**Type:** Boolean
-**Default:** `true`
-**Recommended:** `true` if global chat is desired
-**Requires restart:** Yes
-
-### Description
-
-Enables the global chat system.
-
----
-
-## `player_commands`
-
-```ini
-player_commands = true
-```
-
-**Type:** Boolean
-**Default:** `true`
-**Recommended:** Depends on server policy
-**Requires restart:** Yes
-
-### Description
-
-Enables inauthentic but non-dangerous commands for regular players.
-
-These commands are intended as convenience/custom functionality rather than historical game behavior.
+and have an appropriate clan configured.
 
 ---
 
@@ -1379,12 +1392,14 @@ enable_bots = true
 
 **Type:** Boolean
 **Default:** `true`
-**Recommended:** `true` if using the bot ecosystem
-**Requires restart:** Yes
+**Recommended:** `true` if using server bots
+**Restart required:** Yes
 
 ### Description
 
 Enables server bots.
+
+This controls the availability of the server's bot system.
 
 ---
 
@@ -1396,20 +1411,20 @@ enable_botting = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` unless intentionally supporting botting
-**Requires restart:** Yes
+**Recommended:** `false` unless intentionally allowing botting
+**Restart required:** Yes
 
 ### Description
 
 Enables supported player botting functionality.
 
-This is distinct from:
+This is separate from:
 
 ```ini
 enable_bots = true
 ```
 
-which controls server bots.
+which enables server-controlled bots.
 
 ---
 
@@ -1421,18 +1436,147 @@ max_adv_bots = 100
 
 **Type:** Integer
 **Default:** `100`
-**Recommended:** Based on available CPU/RAM
-**Requires restart:** Yes
+**Recommended:** Based on available CPU and RAM
+**Restart required:** Yes
 
 ### Description
 
-Sets the maximum number of advanced bots that may be active.
+Controls the maximum number of advanced bots.
 
-Higher values can increase resource consumption.
+Increasing the number of active bots can increase:
+
+* CPU usage
+* Memory usage
+* Game-world activity
+* Database activity
 
 ---
 
-# Grand Exchange
+# Message of the Week
+
+## `motw_identifier`
+
+```ini
+motw_identifier = "0"
+```
+
+**Type:** String/integer
+**Default:** `0`
+**Recommended:** `0` for random selection
+**Restart required:** Yes
+
+### Description
+
+Specifies the Message of the Week model ID.
+
+The value `0` indicates random selection.
+
+---
+
+## `motw_text`
+
+```ini
+motw_text = "Welcome to @name!"
+```
+
+**Type:** String
+**Default:** `Welcome to @name!`
+**Recommended:** Customize as desired
+**Restart required:** Yes
+
+### Description
+
+Specifies the text displayed for the Message of the Week.
+
+The special placeholder:
+
+```text
+@name
+```
+
+is replaced with the configured world name.
+
+With:
+
+```ini
+name = "2009Scape"
+```
+
+the message:
+
+```text
+Welcome to @name!
+```
+
+becomes:
+
+```text
+Welcome to 2009Scape!
+```
+
+---
+
+# Player Locations
+
+## `new_player_location`
+
+```ini
+new_player_location = "3094,3107,0"
+```
+
+**Type:** Coordinate string
+**Default:** `3094,3107,0`
+**Recommended:** Keep the standard location unless intentionally changing the spawn
+**Restart required:** Yes
+
+### Description
+
+Specifies the location where new players spawn.
+
+The format is:
+
+```text
+X,Y,Plane
+```
+
+Example:
+
+```text
+3094,3107,0
+```
+
+Where:
+
+* `3094` = X coordinate
+* `3107` = Y coordinate
+* `0` = plane/height level
+
+---
+
+## `home_location`
+
+```ini
+home_location = "3222,3218,0"
+```
+
+**Type:** Coordinate string
+**Default:** `3222,3218,0`
+**Recommended:** Keep the standard location unless intentionally changing home
+**Restart required:** Yes
+
+### Description
+
+Specifies the destination used for the home teleport.
+
+Format:
+
+```text
+X,Y,Plane
+```
+
+---
+
+# Grand Exchange Settings
 
 ## `autostock_ge`
 
@@ -1443,11 +1587,11 @@ autostock_ge = false
 **Type:** Boolean
 **Default:** `false`
 **Recommended:** Depends on desired economy behavior
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Enables automatic Grand Exchange stocking behavior.
+Enables automatic Grand Exchange stocking.
 
 ---
 
@@ -1459,12 +1603,12 @@ allow_token_purchase = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** Depends on server design
-**Requires restart:** Yes
+**Recommended:** Depends on desired economy/gameplay
+**Restart required:** Yes
 
 ### Description
 
-Enables supported token-purchase functionality.
+Controls whether supported token purchases are allowed.
 
 ---
 
@@ -1476,12 +1620,12 @@ bots_influence_ge_price = true
 
 **Type:** Boolean
 **Default:** `true`
-**Recommended:** `true` for a bot-driven economy
-**Requires restart:** Yes
+**Recommended:** Depends on desired economy
+**Restart required:** Yes
 
 ### Description
 
-Determines whether bot activity contributes to Grand Exchange pricing.
+Determines whether bot activity can influence Grand Exchange pricing.
 
 ---
 
@@ -1492,14 +1636,14 @@ ge_announcement_limit = 500
 ```
 
 **Type:** Integer
-**Unit:** High-alchemy value
+**Unit:** High Alchemy value
 **Default:** `500`
-**Recommended:** Depends on desired announcement volume
-**Requires restart:** Yes
+**Recommended:** Depends on desired announcement frequency
+**Restart required:** Yes
 
 ### Description
 
-Sets the minimum high-alchemy value for bot Grand Exchange sale announcements.
+Specifies the minimum high-alchemy value required for announcements about bots selling items on the Grand Exchange.
 
 ---
 
@@ -1511,8 +1655,8 @@ personalized_shops = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` unless specifically required
-**Requires restart:** Yes
+**Recommended:** `false` unless specifically desired
+**Restart required:** Yes
 
 ### Description
 
@@ -1520,120 +1664,24 @@ Enables personalized shop behavior.
 
 ---
 
-# PvP and Wilderness
-
-## `pvp`
-
-```ini
-pvp = false
-```
-
-**Type:** Boolean
-**Default:** `false`
-**Recommended:** Depends on world type
-**Requires restart:** Yes
-
-### Description
-
-Controls whether the world itself is configured as a PvP world.
-
----
-
-## `wild_pvp_enabled`
-
-```ini
-wild_pvp_enabled = true
-```
-
-**Type:** Boolean
-**Default:** `true`
-**Recommended:** Depends on desired Wilderness behavior
-**Requires restart:** Yes
-
-### Description
-
-Enables the supported Wilderness PvP functionality.
-
-This is separate from the overall `pvp` world setting.
-
----
-
-## `enhanced_deep_wilderness`
-
-```ini
-enhanced_deep_wilderness = false
-```
-
-**Type:** Boolean
-**Default:** `false`
-**Recommended:** `false` for a more standard ruleset
-**Requires restart:** Yes
-
-### Description
-
-Enables the enhanced deep Wilderness.
-
-The configuration describes this as applying a red skull beyond the members' fence and increasing certain brawler/PvP drop rates.
-
----
-
-## `wilderness_exclusive_loot`
-
-```ini
-wilderness_exclusive_loot = false
-```
-
-**Type:** Boolean
-**Default:** `false`
-**Recommended:** Depends on desired loot system
-**Requires restart:** Yes
-
-### Description
-
-Enables Wilderness-exclusive loot from supported monsters such as Revenants and the Chaos Elemental.
-
-Examples include:
-
-* Brawling gloves
-* PvP equipment
-
----
-
-## `revenant_population`
-
-```ini
-revenant_population = 30
-```
-
-**Type:** Integer
-**Default:** `30`
-**Recommended:** Depends on server population
-**Requires restart:** Yes
-
-### Description
-
-Controls how many Revenants are active at a time.
-
-Higher values increase Wilderness NPC population and may increase server load.
-
----
-
-# Gameplay Modifications
+# Gameplay Settings
 
 ## `skillcape_perks`
 
 ```ini
-skillcape_perks = true
+skillcape_perks = false
 ```
 
 **Type:** Boolean
-**Default:** `true`
-**Recommended:** Depends on desired ruleset
-**Requires restart:** Yes
+**Default:** `false`
+**Recommended:** `true` if desired as an enhanced gameplay feature
+**Restart required:** Yes
 
 ### Description
 
 Enables skillcape perks.
+
+The default configuration leaves this disabled.
 
 ---
 
@@ -1645,12 +1693,12 @@ increased_door_time = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` for standard behavior
-**Requires restart:** Yes
+**Recommended:** `false`
+**Restart required:** Yes
 
 ### Description
 
-Enables increased door-open timing.
+Enables increased door timing.
 
 ---
 
@@ -1662,12 +1710,14 @@ enable_doubling_money_scammers = true
 
 **Type:** Boolean
 **Default:** `true`
-**Recommended:** Depends on desired world behavior
-**Requires restart:** Yes
+**Recommended:** Depends on intended gameplay environment
+**Restart required:** Yes
 
 ### Description
 
-Controls the supported doubling-money scam-related gameplay.
+Controls the supported doubling-money scam gameplay.
+
+This option is enabled in the upstream default configuration.
 
 ---
 
@@ -1679,104 +1729,200 @@ jad_practice_enabled = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` unless used as a training feature
-**Requires restart:** Yes
+**Recommended:** Optional
+**Restart required:** Yes
 
 ### Description
 
-Enables the Jad practice functionality.
-
-This is useful for players who want to practice against TzTok-Jad without completing a standard Fight Caves run.
+Enables the Jad practice feature.
 
 ---
 
-## `better_agility_pyramid_gp`
+## `enable_global_chat`
 
 ```ini
-better_agility_pyramid_gp = false
+enable_global_chat = false
 ```
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` for standard behavior
-**Requires restart:** Yes
+**Recommended:** `true` if global chat is desired
+**Restart required:** Yes
 
 ### Description
 
-Enables the enhanced Agility Pyramid reward.
+Enables global chat functionality.
 
-The configured formula is:
-
-```text
-GP = 1000 + ((Agility Level / 99) × 9000)
-```
-
-The reward therefore scales with Agility level.
+The upstream default leaves this disabled.
 
 ---
 
-## `better_dfs`
+## `verbose_cutscene`
 
 ```ini
-better_dfs = false
+verbose_cutscene = false
 ```
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` for standard behavior
-**Requires restart:** Yes
+**Recommended:** `false`, enable while debugging cutscenes
+**Restart required:** Yes
 
 ### Description
 
-Changes the Dragonfire Shield special attack cooldown.
+Enables verbose logging for cutscenes using the newer cutscene system.
 
-When enabled, the documented cooldown is approximately:
-
-```text
-30 seconds
-```
-
-instead of:
-
-```text
-2 minutes
-```
+This is primarily useful when troubleshooting cutscene behavior.
 
 ---
 
-## `i_want_to_cheat`
+## `show_rules`
 
 ```ini
-i_want_to_cheat = false
+show_rules = false
 ```
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` for normal multiplayer servers
-**Requires restart:** Yes
+**Recommended:** `true` for a public/custom server
+**Restart required:** Yes
 
 ### Description
 
-Enables supported cheat functionality.
+Controls whether players are shown the server rules the first time they log in.
 
-This is primarily intended for testing, development, or special-purpose environments.
+For a custom server, enabling this can help communicate:
+
+* Server rules
+* Gameplay policies
+* Community guidelines
+* Custom mechanics
 
 ---
 
-## `enable_castle_wars`
+## `new_player_announcement`
 
 ```ini
-enable_castle_wars = false
+new_player_announcement = false
 ```
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** Depends on whether Castle Wars is being used
-**Requires restart:** Yes
+**Recommended:** `true` if desired
+**Restart required:** Yes
 
 ### Description
 
-Enables Castle Wars functionality.
+Controls whether the server announces newly arriving players.
+
+---
+
+## `player_commands`
+
+```ini
+player_commands = false
+```
+
+**Type:** Boolean
+**Default:** `false`
+**Recommended:** `true` if the additional commands are desired
+**Restart required:** Yes
+
+### Description
+
+Enables inauthentic but non-dangerous commands for regular players.
+
+The default configuration disables these commands.
+
+---
+
+# PvP and Wilderness
+
+## `wild_pvp_enabled`
+
+```ini
+wild_pvp_enabled = false
+```
+
+**Type:** Boolean
+**Default:** `false`
+**Recommended:** `true` if standard Wilderness PvP is desired
+**Restart required:** Yes
+
+### Description
+
+Enables Wilderness PvP functionality.
+
+This setting is separate from:
+
+```ini
+pvp = false
+```
+
+which controls whether the world itself is a PvP world.
+
+---
+
+## `enhanced_deep_wilderness`
+
+```ini
+enhanced_deep_wilderness = false
+```
+
+**Type:** Boolean
+**Default:** `false`
+**Recommended:** `false` unless intentionally using the enhanced Wilderness system
+**Restart required:** Yes
+
+### Description
+
+Enables the enhanced deep Wilderness.
+
+According to the configuration description, the area past the members' fence applies a red skull that increases certain brawler/PvP drop rates.
+
+---
+
+## `wilderness_exclusive_loot`
+
+```ini
+wilderness_exclusive_loot = false
+```
+
+**Type:** Boolean
+**Default:** `false`
+**Recommended:** Depends on desired Wilderness economy
+**Restart required:** Yes
+
+### Description
+
+Enables Wilderness-exclusive loot from:
+
+* Revenants
+* Chaos Elemental
+
+Examples include:
+
+* Brawling gloves
+* PvP gear
+
+---
+
+## `revenant_population`
+
+```ini
+revenant_population = 30
+```
+
+**Type:** Integer
+**Default:** `30`
+**Recommended:** Based on desired Wilderness activity
+**Restart required:** Yes
+
+### Description
+
+Specifies the number of Revenants active at a time.
+
+Increasing this value can make the Wilderness more active while potentially increasing server resource usage.
 
 ---
 
@@ -1791,13 +1937,13 @@ inauthentic_candlelight_random = false
 **Type:** Boolean
 **Default:** `false`
 **Recommended:** `false` for a more authentic ruleset
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Adds the Candlelight random event as an additional normal random event.
+Enables the inauthentic Candlelight random event.
 
-The configuration explicitly identifies this as inauthentic content.
+When enabled, it adds an additional normal random event.
 
 ---
 
@@ -1809,12 +1955,14 @@ holiday_event_randoms = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** Depends on desired event availability
-**Requires restart:** Yes
+**Recommended:** Depends on event policy
+**Restart required:** Yes
 
 ### Description
 
 Enables holiday random events.
+
+This does not affect normal random events.
 
 ---
 
@@ -1826,14 +1974,14 @@ force_halloween_randoms = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` except during testing/event periods
-**Requires restart:** Yes
+**Recommended:** `false` except when intentionally forcing Halloween events
+**Restart required:** Yes
 
 ### Description
 
 Forces Halloween random events.
 
-Only one forced holiday random should be enabled at a time.
+Only one forced holiday random should be active at a time.
 
 ---
 
@@ -1845,12 +1993,14 @@ force_christmas_randoms = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` except during testing/event periods
-**Requires restart:** Yes
+**Recommended:** `false` except when intentionally forcing Christmas events
+**Restart required:** Yes
 
 ### Description
 
 Forces Christmas random events.
+
+Only one forced holiday random should be active at a time.
 
 ---
 
@@ -1862,12 +2012,12 @@ april_fools_event = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` except during event/testing periods
-**Requires restart:** Yes
+**Recommended:** `false` except during the intended event/testing period
+**Restart required:** Yes
 
 ### Description
 
-Enables the April Fools event.
+Enables the inauthentic April Fools event.
 
 ---
 
@@ -1879,8 +2029,8 @@ force_april_fools = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false`
-**Requires restart:** Yes
+**Recommended:** `false` except when intentionally forcing the event
+**Restart required:** Yes
 
 ### Description
 
@@ -1898,49 +2048,57 @@ runecrafting_formula_revision = 530
 
 **Type:** Integer
 **Default:** `530`
-**Recommended:** Match the intended historical ruleset
-**Requires restart:** Yes
+**Recommended:** Match the desired historical ruleset
+**Restart required:** Yes
 
 ### Description
 
-Determines which Runecrafting formula revision is used.
+Specifies which Runecrafting formula revision is used.
 
 The configuration notes:
 
-* Revision 573 introduced probabilistic multiple-rune production.
-* Revision 581 extrapolated probabilistic rune production beyond level 99.
+* Revision `573` introduced probabilistic multiple-rune production.
+* Revision `581` extrapolated probabilistic rune production beyond level 99.
 
-Therefore, this setting controls an important aspect of Runecrafting production rates.
+The default:
+
+```ini
+runecrafting_formula_revision = 530
+```
+
+therefore uses the earlier formula behavior.
 
 ---
 
 ## `xp_rates`
 
 ```ini
-xp_rates = true
+xp_rates = false
 ```
 
 **Type:** Boolean
-**Default:** `true`
-**Recommended:** Depends on desired progression system
-**Requires restart:** Yes
+**Default:** `false`
+**Recommended:** `true` if players should choose XP rates on Tutorial Island
+**Restart required:** Yes
 
 ### Description
 
-Enables XP-rate selection on Tutorial Island.
+Enables the XP-rates option on Tutorial Island.
+
+The default configuration does not expose the XP-rate option.
 
 ---
 
 ## `ironman`
 
 ```ini
-ironman = true
+ironman = false
 ```
 
 **Type:** Boolean
-**Default:** `true`
-**Recommended:** `true` if Ironman creation is desired
-**Requires restart:** Yes
+**Default:** `false`
+**Recommended:** `true` if Ironman creation should be available
+**Restart required:** Yes
 
 ### Description
 
@@ -1958,12 +2116,15 @@ shooting_star_ring = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** `false` for standard content
-**Requires restart:** Yes
+**Recommended:** `false` unless custom content is desired
+**Restart required:** Yes
 
 ### Description
 
-Enables the custom-content Ancient Blueprint and Ring of the Star Sprite.
+Enables the custom-content:
+
+* Ancient Blueprint
+* Ring of the Star Sprite
 
 This is explicitly identified as custom content.
 
@@ -1977,12 +2138,12 @@ second_bank = false
 
 **Type:** Boolean
 **Default:** `false`
-**Recommended:** Depends on desired storage system
-**Requires restart:** Yes
+**Recommended:** `false` unless a second bank is desired
+**Restart required:** Yes
 
 ### Description
 
-Enables a second bank.
+Enables the second bank feature.
 
 ---
 
@@ -1995,66 +2156,53 @@ boosted_trawler_rewards = false
 **Type:** Boolean
 **Default:** `false`
 **Recommended:** `false` for standard rewards
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Increases Fishing Trawler rewards.
+Enables boosted Fishing Trawler rewards.
 
-The configuration specifically mentions:
+The configuration specifically identifies:
 
 * Key halves
 * Pirate outfit pieces
 
----
-
-## `verbose_cutscene`
-
-```ini
-verbose_cutscene = false
-```
-
-**Type:** Boolean
-**Default:** `false`
-**Recommended:** `false` during normal operation
-**Requires restart:** Yes
-
-### Description
-
-Enables verbose logging for cutscenes using the newer cutscene system.
-
-Useful when troubleshooting cutscene behavior.
+as boosted rewards.
 
 ---
 
 # `[paths]`
 
-The `[paths]` section controls where 2009Scape stores its files.
+The `[paths]` section determines where 2009Scape stores server data.
 
-A typical layout is:
+A typical directory structure is:
 
 ```text
 data/
 ├── cache/
 ├── configs/
+│   └── shared_tables/
 ├── eco/
 ├── logs/
 ├── players/
 ├── serverstore/
-└── botdata/
+├── botdata/
+└── ObjectParser.xml
 ```
+
+The exact contents can vary depending on the server version and installed data.
 
 ---
 
-# `@data` Path Variable
+# The `@data` Variable
 
-The special value:
+Many paths begin with:
 
 ```text
 @data
 ```
 
-refers to the path specified by:
+This is a path variable referring to the value configured by:
 
 ```ini
 data_path = "data"
@@ -2073,7 +2221,25 @@ resolves to:
 data/logs
 ```
 
-This makes it possible to relocate the entire data directory without changing every individual path.
+If `data_path` is changed to:
+
+```ini
+data_path = "server-data"
+```
+
+then:
+
+```ini
+logs_path = "@data/logs"
+```
+
+automatically resolves to:
+
+```text
+server-data/logs
+```
+
+This makes it possible to relocate the entire server data directory without changing every individual path.
 
 ---
 
@@ -2085,14 +2251,14 @@ data_path = "data"
 
 **Type:** Path
 **Default:** `data`
-**Recommended:** `data` unless using a custom layout
-**Requires restart:** Yes
+**Recommended:** `data` unless a custom directory layout is required
+**Restart required:** Yes
 
 ### Description
 
-Defines the root directory for server data.
+Specifies the root directory containing server data.
 
-Most other paths use `@data` so that they automatically follow this setting.
+Most other paths use `@data` and therefore follow this setting.
 
 ---
 
@@ -2105,11 +2271,23 @@ cache_path = "@data/cache"
 **Type:** Path
 **Default:** `@data/cache`
 **Recommended:** Keep under `data_path`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
 Specifies the location of cache data.
+
+With:
+
+```ini
+data_path = "data"
+```
+
+the resolved path is:
+
+```text
+data/cache
+```
 
 ---
 
@@ -2121,12 +2299,12 @@ store_path = "@data/serverstore"
 
 **Type:** Path
 **Default:** `@data/serverstore`
-**Recommended:** Keep under `data_path`
-**Requires restart:** Yes
+**Recommended:** Keep on persistent storage
+**Restart required:** Yes
 
 ### Description
 
-Specifies the server's persistent store directory.
+Specifies the location of the server's persistent store data.
 
 ---
 
@@ -2138,14 +2316,14 @@ save_path = "@data/players"
 
 **Type:** Path
 **Default:** `@data/players`
-**Recommended:** Keep on persistent storage and back it up
-**Requires restart:** Yes
+**Recommended:** Keep on persistent storage and back it up regularly
+**Restart required:** Yes
 
 ### Description
 
 Specifies where player save data is stored.
 
-This is one of the most important directories to back up.
+This is one of the most important directories on a server because it contains persistent player information.
 
 ---
 
@@ -2158,11 +2336,11 @@ configs_path = "@data/configs"
 **Type:** Path
 **Default:** `@data/configs`
 **Recommended:** `@data/configs`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Specifies the directory containing server configuration/data files.
+Specifies the directory containing configuration and server data files.
 
 ---
 
@@ -2174,18 +2352,20 @@ grand_exchange_data_path = "@data/eco"
 
 **Type:** Path
 **Default:** `@data/eco`
-**Recommended:** Persistent storage
-**Requires restart:** Yes
+**Recommended:** Persistent storage with backups
+**Restart required:** Yes
 
 ### Description
 
-Specifies where Grand Exchange/economy data is stored.
+Specifies where Grand Exchange and economy data is saved.
 
 ---
 
 # Drop Table Paths
 
-These settings specify the XML files containing various drop tables.
+The following settings point to XML files containing specific drop tables.
+
+These paths are relative to `@data`.
 
 ---
 
@@ -2197,11 +2377,19 @@ rare_drop_table_path = "@data/configs/shared_tables/RDT.xml"
 
 **Type:** Path
 **Default:** `@data/configs/shared_tables/RDT.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
-Specifies the Rare Drop Table (RDT).
+Specifies the Rare Drop Table.
+
+`RDT.xml` is stored in:
+
+```text
+data/configs/shared_tables/
+```
+
+when using the default `data_path`.
 
 ---
 
@@ -2213,7 +2401,7 @@ cele_drop_table_path = "@data/configs/shared_tables/CELEDT.xml"
 
 **Type:** Path
 **Default:** `@data/configs/shared_tables/CELEDT.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
@@ -2229,7 +2417,7 @@ uncommon_seed_drop_table_path = "@data/configs/shared_tables/USDT.xml"
 
 **Type:** Path
 **Default:** `@data/configs/shared_tables/USDT.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
@@ -2245,7 +2433,7 @@ herb_drop_table_path = "@data/configs/shared_tables/HDT.xml"
 
 **Type:** Path
 **Default:** `@data/configs/shared_tables/HDT.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
@@ -2261,7 +2449,7 @@ gem_drop_table_path = "@data/configs/shared_tables/GDT.xml"
 
 **Type:** Path
 **Default:** `@data/configs/shared_tables/GDT.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
@@ -2277,7 +2465,7 @@ rare_seed_drop_table_path = "@data/configs/shared_tables/RSDT.xml"
 
 **Type:** Path
 **Default:** `@data/configs/shared_tables/RSDT.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
@@ -2293,7 +2481,7 @@ allotment_seed_drop_table_path = "@data/configs/shared_tables/ASDT.xml"
 
 **Type:** Path
 **Default:** `@data/configs/shared_tables/ASDT.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
@@ -2309,13 +2497,19 @@ object_parser_path = "@data/ObjectParser.xml"
 
 **Type:** Path
 **Default:** `@data/ObjectParser.xml`
-**Requires restart:** Yes
+**Restart required:** Yes
 
 ### Description
 
 Specifies the XML file containing boot-time object changes.
 
-The server reads this file during startup to apply supported object modifications.
+With the default `data_path`, this resolves to:
+
+```text
+data/ObjectParser.xml
+```
+
+The file is used to apply supported object changes during server startup.
 
 ---
 
@@ -2327,19 +2521,20 @@ logs_path = "@data/logs"
 
 **Type:** Path
 **Default:** `@data/logs`
-**Requires restart:** Yes
+**Recommended:** Keep on persistent storage
+**Restart required:** Yes
 
 ### Description
 
-Specifies where server log files are stored.
+Specifies where server log files are written.
 
-With:
+With the default:
 
 ```ini
 data_path = "data"
 ```
 
-this becomes:
+the path resolves to:
 
 ```text
 data/logs
@@ -2355,11 +2550,12 @@ bot_data = "@data/botdata"
 
 **Type:** Path
 **Default:** `@data/botdata`
-**Requires restart:** Yes
+**Recommended:** Keep on persistent storage if bot data needs to survive restarts
+**Restart required:** Yes
 
 ### Description
 
-Specifies the directory used for bot-related data.
+Specifies the location of bot-related data.
 
 ---
 
@@ -2371,118 +2567,357 @@ eco_data = "@data/eco"
 
 **Type:** Path
 **Default:** `@data/eco`
-**Requires restart:** Yes
+**Recommended:** Keep on persistent storage and back it up
+**Restart required:** Yes
 
 ### Description
 
 Specifies the economy data directory.
 
-In the default configuration, this points to the same location as:
+The default configuration points this to the same location as:
 
 ```ini
 grand_exchange_data_path = "@data/eco"
 ```
 
+Therefore both settings resolve to:
+
+```text
+data/eco
+```
+
+when using the default `data_path`.
+
 ---
 
-# Development Configuration
+# Recommended Configuration
 
-A development server may intentionally use more permissive settings.
+The following represents the recommended values from a typical customized 2009Scape configuration.
 
-For example:
+These are **not the upstream defaults**.
 
 ```ini
 [server]
 log_level = "verbose"
+secret_key = "2009scape_development"
 write_logs = true
-use_auth = false
-persist_accounts = false
-noauth_default_admin = true
+msip = "127.0.0.1"
 preload_map = false
+
+use_auth = true
+persist_accounts = true
+noauth_default_admin = true
+
+daily_accounts_per_ip = 9999
 watchdog_enabled = true
+
+connectivity_check_url = "https://google.com,https://2009scape.org"
+connectivity_timeout = 500
+
+websocket_enabled = false
+websocket_port = 0
+websocket_tls_enabled = false
+websocket_tls_keystore_path = ""
+websocket_tls_keystore_password = ""
+
+[database]
+database_name = "global"
+database_username = "root"
+database_password = ""
+database_address = "127.0.0.1"
+database_port = "3306"
+
+[integrations]
+grafana_logging = false
+grafana_log_path = "@data/logs"
+grafana_log_ttl_days = 7
 
 [world]
 name = "2009Scape"
 name_ge = "2009Scape"
-debug = true
-dev = true
+
+debug = false
+dev = false
 start_gui = false
+daily_restart = true
+
+world_id = "1"
+country_id = "0"
+members = true
+activity = "2009Scape Classic."
+pvp = false
+
+enable_default_clan = true
+enable_bots = true
+
+motw_identifier = "0"
+motw_text = "Welcome to @name!"
+
+new_player_location = "3094,3107,0"
+home_location = "3222,3218,0"
+
+autostock_ge = false
+allow_token_purchase = false
+skillcape_perks = true
+increased_door_time = false
+
+enable_botting = false
+max_adv_bots = 100
+enable_doubling_money_scammers = true
+
+wild_pvp_enabled = true
+jad_practice_enabled = false
+enable_global_chat = true
+
+ge_announcement_limit = 500
+enable_castle_wars = false
+personalized_shops = false
+bots_influence_ge_price = true
+
+verbose_cutscene = false
+show_rules = true
+
+revenant_population = 30
+
+i_want_to_cheat = false
+better_agility_pyramid_gp = false
+better_dfs = false
+
+new_player_announcement = true
+
+inauthentic_candlelight_random = false
+holiday_event_randoms = false
+force_halloween_randoms = false
+force_christmas_randoms = false
+
+april_fools_event = false
+force_april_fools = false
+
+runecrafting_formula_revision = 530
+
+enhanced_deep_wilderness = false
+wilderness_exclusive_loot = false
+
+xp_rates = true
+ironman = true
+
+shooting_star_ring = false
+second_bank = false
+player_commands = true
+boosted_trawler_rewards = false
+
+[paths]
+data_path = "data"
+cache_path = "@data/cache"
+store_path = "@data/serverstore"
+save_path = "@data/players"
+configs_path = "@data/configs"
+
+grand_exchange_data_path = "@data/eco"
+
+rare_drop_table_path = "@data/configs/shared_tables/RDT.xml"
+cele_drop_table_path = "@data/configs/shared_tables/CELEDT.xml"
+uncommon_seed_drop_table_path = "@data/configs/shared_tables/USDT.xml"
+herb_drop_table_path = "@data/configs/shared_tables/HDT.xml"
+gem_drop_table_path = "@data/configs/shared_tables/GDT.xml"
+rare_seed_drop_table_path = "@data/configs/shared_tables/RSDT.xml"
+allotment_seed_drop_table_path = "@data/configs/shared_tables/ASDT.xml"
+
+object_parser_path = "@data/ObjectParser.xml"
+
+logs_path = "@data/logs"
+bot_data = "@data/botdata"
+eco_data = "@data/eco"
 ```
-
-This type of configuration is useful when developing scripts, testing gameplay, or debugging the server.
-
-However, it should **not** be copied directly to a public production server.
 
 ---
 
 # Production Configuration
 
-A production server should normally prioritize authentication, persistent data, secure database access, and controlled logging.
+A production server should pay particular attention to authentication, account persistence, database security, and development options.
 
-A basic example is:
+At minimum, the following should normally be changed from the upstream development defaults:
 
 ```ini
-[server]
-log_level = "detailed"
-write_logs = true
 use_auth = true
 persist_accounts = true
-noauth_default_admin = false
-preload_map = false
-watchdog_enabled = true
-
-[database]
-database_name = "global"
-database_username = "2009scape"
-database_password = "YOUR_DATABASE_PASSWORD"
-database_address = "127.0.0.1"
-database_port = "3306"
-
-[world]
-name = "2009Scape"
-name_ge = "2009Scape"
 debug = false
 dev = false
-start_gui = false
-daily_restart = true
-world_id = "1"
 ```
 
-The exact production configuration should be adapted to the server's intended gameplay rules and infrastructure.
+It is also recommended to use:
+
+```ini
+noauth_default_admin = false
+```
+
+rather than granting administrative privileges to unauthenticated users.
+
+A production database should preferably use a dedicated database account rather than:
+
+```ini
+database_username = "root"
+```
+
+For example:
+
+```ini
+database_username = "2009scape"
+database_password = "YOUR_STRONG_DATABASE_PASSWORD"
+```
+
+The database account should have only the permissions required by the server.
+
+---
+
+# Development vs. Production
+
+The most important differences between the supplied defaults and a production-oriented configuration are:
+
+| Setting                 | Default | Recommended | Reason                               |
+| ----------------------- | ------: | ----------: | ------------------------------------ |
+| `use_auth`              | `false` |      `true` | Password authentication              |
+| `persist_accounts`      | `false` |      `true` | Persist account-level information    |
+| `noauth_default_admin`  |  `true` |     `false` | Prevent unauthenticated admin access |
+| `daily_accounts_per_ip` |     `3` |     Depends | Account/IP policy                    |
+| `watchdog_enabled`      | `false` |      `true` | Runtime monitoring                   |
+| `debug`                 |  `true` |     `false` | Disable development debugging        |
+| `dev`                   |  `true` |     `false` | Disable development behavior         |
+| `daily_restart`         | `false` |      `true` | Scheduled maintenance cycle          |
+| `skillcape_perks`       | `false` |      `true` | Optional enhanced gameplay           |
+| `wild_pvp_enabled`      | `false` |      `true` | Enable Wilderness PvP                |
+| `enable_global_chat`    | `false` |      `true` | Enable global chat                   |
+| `show_rules`            | `false` |      `true` | Show server rules                    |
+| `xp_rates`              | `false` |      `true` | Enable Tutorial Island XP selection  |
+| `ironman`               | `false` |      `true` | Enable Ironman creation              |
+| `player_commands`       | `false` |      `true` | Enable supported player commands     |
+
+The **Recommended** column is not an official 2009Scape requirement. These values represent a practical customized-server configuration.
+
+---
+
+# Important Security Considerations
+
+## Authentication
+
+For a public server:
+
+```ini
+use_auth = true
+```
+
+should be used.
+
+Leaving authentication disabled means the server does not verify the correctness of the password.
+
+---
+
+## Unauthenticated Administration
+
+The combination:
+
+```ini
+use_auth = false
+noauth_default_admin = true
+```
+
+is particularly important to understand.
+
+It means the server is operating without password authentication while unauthenticated players can be treated as administrators.
+
+This combination is appropriate only for controlled development/testing environments.
+
+---
+
+## Database Credentials
+
+Avoid using the MySQL/MariaDB `root` account for a public production server when possible.
+
+Instead, create a dedicated account:
+
+```ini
+database_username = "2009scape"
+database_password = "strong-password"
+```
+
+---
+
+## Webhook URLs
+
+Never publish active Discord webhook URLs in a public repository.
+
+If a webhook is accidentally exposed, it should be revoked and replaced.
+
+---
+
+## TLS Keystores
+
+If WebSocket TLS is enabled, protect:
+
+```text
+.p12
+```
+
+keystore files and their passwords.
+
+Do not commit private TLS credentials to GitHub.
 
 ---
 
 # Backup Recommendations
 
-At minimum, regularly back up:
+The most important server data should be backed up regularly.
+
+## Player Saves
 
 ```text
 data/players/
 ```
 
-This contains persistent player save data.
+This should be considered critical data.
 
-Also consider backing up:
+A loss of this directory can result in loss of player progression.
+
+---
+
+## Economy Data
 
 ```text
 data/eco/
 ```
 
-which contains economy/Grand Exchange information.
+This contains economy/Grand Exchange-related information.
 
-You should also preserve your:
+Because both:
+
+```ini
+grand_exchange_data_path = "@data/eco"
+eco_data = "@data/eco"
+```
+
+point to the same location, this directory should also be included in backups.
+
+---
+
+## Configuration
+
+Back up:
 
 ```text
 default.conf
 ```
 
-and any customized files under:
+as well as customized configuration files under:
 
 ```text
 data/configs/
 ```
 
-A useful backup structure might be:
+---
+
+## Suggested Backup Structure
+
+A backup directory could look like:
 
 ```text
 backups/
@@ -2493,100 +2928,128 @@ backups/
 └── configs/
 ```
 
+For an active server, automated backups are preferable to manual backups.
+
 ---
 
 # Quick Reference
 
-| Setting                    | Type     | Main Purpose                       |
-| -------------------------- | -------- | ---------------------------------- |
-| `log_level`                | String   | Logging verbosity                  |
-| `secret_key`               | String   | Client/server authentication key   |
-| `write_logs`               | Boolean  | Persistent server logs             |
-| `msip`                     | IP       | Management/server address          |
-| `preload_map`              | Boolean  | Preload map into memory            |
-| `use_auth`                 | Boolean  | Password authentication            |
-| `persist_accounts`         | Boolean  | Persist account-level data         |
-| `noauth_default_admin`     | Boolean  | Admin access when auth is disabled |
-| `daily_accounts_per_ip`    | Integer  | Account/IP limit                   |
-| `watchdog_enabled`         | Boolean  | Server watchdog                    |
-| `connectivity_check_url`   | URL list | Internet connectivity testing      |
-| `connectivity_timeout`     | Integer  | Connectivity timeout               |
-| `websocket_enabled`        | Boolean  | Browser WebSocket support          |
-| `websocket_port`           | Integer  | WebSocket port                     |
-| `websocket_tls_enabled`    | Boolean  | WebSocket TLS                      |
-| `database_name`            | String   | SQL database                       |
-| `database_username`        | String   | SQL username                       |
-| `database_password`        | String   | SQL password                       |
-| `database_address`         | String   | SQL host                           |
-| `database_port`            | Port     | SQL port                           |
-| `grafana_logging`          | Boolean  | Grafana logging                    |
-| `name`                     | String   | World name                         |
-| `name_ge`                  | String   | GE announcement world name         |
-| `world_id`                 | String   | World number                       |
-| `members`                  | Boolean  | Members world                      |
-| `pvp`                      | Boolean  | PvP world                          |
-| `enable_bots`              | Boolean  | Server bots                        |
-| `enable_botting`           | Boolean  | Botting functionality              |
-| `wild_pvp_enabled`         | Boolean  | Wilderness PvP                     |
-| `revenant_population`      | Integer  | Active Revenants                   |
-| `xp_rates`                 | Boolean  | Tutorial Island XP rates           |
-| `ironman`                  | Boolean  | Ironman creation                   |
-| `second_bank`              | Boolean  | Second bank                        |
-| `player_commands`          | Boolean  | Player commands                    |
-| `data_path`                | Path     | Root data directory                |
-| `cache_path`               | Path     | Cache                              |
-| `save_path`                | Path     | Player saves                       |
-| `configs_path`             | Path     | Configuration data                 |
-| `grand_exchange_data_path` | Path     | Economy/GE data                    |
-| `logs_path`                | Path     | Logs                               |
-| `bot_data`                 | Path     | Bot data                           |
-| `eco_data`                 | Path     | Economy data                       |
+## Server
+
+| Setting                 | Default                 | Recommended                |
+| ----------------------- | ----------------------- | -------------------------- |
+| `log_level`             | `verbose`               | `verbose` / `detailed`     |
+| `secret_key`            | `2009scape_development` | Matching client/server key |
+| `write_logs`            | `true`                  | `true`                     |
+| `msip`                  | `127.0.0.1`             | `127.0.0.1`                |
+| `preload_map`           | `false`                 | `false`                    |
+| `use_auth`              | `false`                 | `true`                     |
+| `persist_accounts`      | `false`                 | `true`                     |
+| `noauth_default_admin`  | `true`                  | `false`                    |
+| `daily_accounts_per_ip` | `3`                     | Depends                    |
+| `watchdog_enabled`      | `false`                 | `true`                     |
+| `connectivity_timeout`  | `500`                   | `500`                      |
+
+## Database
+
+| Setting             | Default     | Recommended          |
+| ------------------- | ----------- | -------------------- |
+| `database_name`     | `global`    | Your database        |
+| `database_username` | `root`      | Dedicated user       |
+| `database_password` | Empty       | Strong password      |
+| `database_address`  | `127.0.0.1` | `127.0.0.1` if local |
+| `database_port`     | `3306`      | `3306`               |
+
+## World
+
+| Setting              | Default     | Recommended     |
+| -------------------- | ----------- | --------------- |
+| `name`               | `2009Scape` | `2009Scape`     |
+| `name_ge`            | `2009Scape` | `2009Scape`     |
+| `debug`              | `true`      | `false`         |
+| `dev`                | `true`      | `false`         |
+| `start_gui`          | `false`     | `false`         |
+| `daily_restart`      | `false`     | `true`          |
+| `world_id`           | `1`         | Unique world ID |
+| `members`            | `true`      | Depends         |
+| `pvp`                | `false`     | Depends         |
+| `enable_bots`        | `true`      | Depends         |
+| `enable_botting`     | `false`     | Depends         |
+| `wild_pvp_enabled`   | `false`     | Depends         |
+| `enable_global_chat` | `false`     | Depends         |
+| `show_rules`         | `false`     | `true`          |
+| `xp_rates`           | `false`     | Depends         |
+| `ironman`            | `false`     | Depends         |
+| `player_commands`    | `false`     | Depends         |
+
+## Paths
+
+| Setting                    | Default             |
+| -------------------------- | ------------------- |
+| `data_path`                | `data`              |
+| `cache_path`               | `@data/cache`       |
+| `store_path`               | `@data/serverstore` |
+| `save_path`                | `@data/players`     |
+| `configs_path`             | `@data/configs`     |
+| `grand_exchange_data_path` | `@data/eco`         |
+| `logs_path`                | `@data/logs`        |
+| `bot_data`                 | `@data/botdata`     |
+| `eco_data`                 | `@data/eco`         |
 
 ---
 
 # Summary
 
-The 2009Scape `default.conf` file provides a centralized way to configure the server without modifying source code.
+The 2009Scape `default.conf` is primarily a **development-oriented starting configuration**.
 
-The most important categories are:
+Several of its defaults intentionally favor convenience over security or persistence:
 
-### Server
+```ini
+use_auth = false
+persist_accounts = false
+debug = true
+dev = true
+daily_restart = false
+watchdog_enabled = false
+```
 
-Controls authentication, logging, networking, watchdog behavior, and WebSockets.
+For a production server, these settings should be reviewed carefully.
 
-### Database
+The most important production changes are:
 
-Controls the MySQL/MariaDB connection.
+```ini
+use_auth = true
+persist_accounts = true
+noauth_default_admin = false
+debug = false
+dev = false
+```
 
-### Integrations
+Other options, such as:
 
-Controls optional services such as Grafana and webhook integrations.
+```ini
+skillcape_perks
+wild_pvp_enabled
+enable_global_chat
+show_rules
+xp_rates
+ironman
+player_commands
+```
 
-### World
+are primarily **gameplay decisions** rather than security requirements. Their appropriate values depend on the ruleset you want your 2009Scape world to provide.
 
-Controls the actual gameplay rules and available features.
-
-### Paths
-
-Controls where server data, player saves, logs, economy information, bots, cache, and configuration files are stored.
-
-For a standard 2009Scape installation, the world identity should normally remain:
+The standard world identity is:
 
 ```ini
 name = "2009Scape"
 name_ge = "2009Scape"
 ```
 
-while gameplay-specific options can be enabled or disabled depending on the desired server ruleset.
-
-When creating a public server, particular attention should be paid to:
+and paths using `@data` are resolved relative to:
 
 ```ini
-use_auth = true
-persist_accounts = true
-noauth_default_admin = false
-database_username = "..."
-database_password = "..."
+data_path = "data"
 ```
 
-and to keeping database credentials, TLS keystores, and webhook URLs out of publicly accessible repositories.
+making the configuration relatively easy to relocate while keeping the server's cache, player saves, logs, economy data, bot data, and configuration files organized under one data directory.
