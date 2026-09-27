@@ -1,4 +1,3 @@
-```bat
 @echo off
 setlocal EnableExtensions
 
@@ -156,4 +155,3 @@ echo.
 timeout /t %DELAY% /nobreak >nul
 
 goto :restart
-```
