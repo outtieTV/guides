@@ -8,44 +8,53 @@ The goal is to provide both a quick installation path and enough explanation tha
 
 ---
 
+---
+
 # Table of Contents
 
-* [1. What This Guide Installs](#1-what-this-guide-installs)
-* [2. Requirements](#2-requirements)
-* [3. How AzerothCore Works](#3-how-azerothcore-works)
-* [4. Quick Start](#4-quick-start)
-* [5. Install Build Dependencies](#5-install-build-dependencies)
-* [6. Download AzerothCore](#6-download-azerothcore)
-* [7. Install Modules](#7-install-modules)
-* [8. Patch jemalloc](#8-patch-jemalloc)
-* [9. Build AzerothCore](#9-build-azerothcore)
-* [10. Extract Client Data](#10-extract-client-data)
-* [11. Configure MySQL](#11-configure-mysql)
-* [12. Configure AzerothCore](#12-configure-azerothcore)
-* [13. Create the AzerothCore Databases](#13-create-the-azerothcore-databases)
-* [14. Configure the Realm Address](#14-configure-the-realm-address)
-* [15. Start the Servers](#15-start-the-servers)
-* [16. Create a Player Account](#16-create-a-player-account)
-* [17. Create an Admin Account](#17-create-an-admin-account)
-* [18. Configure Playerbot](#18-configure-playerbot)
-* [19. Configure AuctionBot](#19-configure-auctionbot)
-* [20. LAN vs Internet Servers](#20-lan-vs-internet-servers)
-* [21. Firewall Configuration](#21-firewall-configuration)
-* [22. Client Configuration](#22-client-configuration)
-* [23. Verify the Installation](#23-verify-the-installation)
-* [24. Using `screen`](#24-using-screen)
-* [25. systemd Services](#25-systemd-services)
-* [26. Backing Up the Server](#26-backing-up-the-server)
-* [27. Updating AzerothCore](#27-updating-azerothcore)
-* [28. Troubleshooting](#28-troubleshooting)
-* [29. Performance Considerations](#29-performance-considerations)
-* [30. Security Notes](#30-security-notes)
-* [31. Useful Commands](#31-useful-commands)
-* [32. Final Checklist](#32-final-checklist)
+* [What This Guide Installs](#what-this-guide-installs)
+* [Requirements](#requirements)
+* [How AzerothCore Works](#how-azerothcore-works)
+* [Quick Start](#quick-start)
+* [Install Build Dependencies](#install-build-dependencies)
+* [Download AzerothCore](#download-azerothcore)
+* [Install Modules](#install-modules)
+* [Build AzerothCore](#build-azerothcore)
+* [Download Client Data](#download-client-data)
+* [Configure MySQL](#configure-mysql)
+* [Configure `secure-file-priv`](#configure-secure-file-priv)
+* [Create the `acore` MySQL User](#create-the-acore-mysql-user)
+* [Run MySQL's Security Script](#run-mysqls-security-script)
+* [Configure AzerothCore](#configure-azerothcore)
+* [Create the AzerothCore Databases](#create-the-azerothcore-databases)
+* [Configure the Realm Address](#configure-the-realm-address)
+* [Initialize the World and Characters Databases](#initialize-the-world-and-characters-databases)
+* [Create a Player Account](#create-a-player-account)
+* [Create an Admin Account](#create-an-admin-account)
+* [Configure Playerbot](#configure-playerbot)
+* [Enable Other Modules](#enable-other-modules)
+* [Configure AuctionBot](#configure-auctionbot)
+* [Create the AuctionBot Character](#create-the-auctionbot-character)
+* [Configure AHBot](#configure-ahbot)
+* [LAN vs Internet Servers](#lan-vs-internet-servers)
+* [Firewall Configuration](#firewall-configuration)
+* [Configure the WoW Client](#configure-the-wow-client)
+* [Verify the Installation](#verify-the-installation)
+* [Using `screen`](#using-screen)
+* [systemd Services](#systemd-services)
+* [Backing Up the Server](#backing-up-the-server)
+* [Updating AzerothCore](#updating-azerothcore)
+* [Troubleshooting](#troubleshooting)
+* [Performance Considerations](#performance-considerations)
+* [Security Notes](#security-notes)
+* [Useful Commands](#useful-commands)
+* [Final Checklist](#final-checklist)
+* [Glossary](#glossary)
+* [Finished](#-finished)
 
 ---
 
-# 1. What This Guide Installs
+# What This Guide Installs
 
 By the end of this guide you will have:
 
@@ -55,7 +64,7 @@ By the end of this guide you will have:
 * Authentication database
 * Characters database
 * World database
-* Extracted client data
+* Downloaded client data
 * Optional AzerothCore modules
 * Playerbot support
 * Optional AuctionBot configuration
@@ -72,7 +81,7 @@ This guide focuses on running the server on Ubuntu rather than setting up a dedi
 
 ---
 
-# 2. Requirements
+# Requirements
 
 ## Operating System
 
@@ -130,7 +139,7 @@ You do not need to be an expert in C++ or Linux administration to follow the gui
 
 ---
 
-# 3. How AzerothCore Works
+# How AzerothCore Works
 
 AzerothCore is made up of several components.
 
@@ -213,7 +222,7 @@ You can use Playerbot without necessarily using AHBot.
 
 ---
 
-# 4. Quick Start
+# Quick Start
 
 If you already understand Linux, MySQL, AzerothCore, and networking, the basic process is:
 
@@ -222,9 +231,8 @@ If you already understand Linux, MySQL, AzerothCore, and networking, the basic p
 2. Clone AzerothCore
 3. Download modules
 4. Initialize submodules
-5. Patch jemalloc if required
 6. Build AzerothCore
-7. Extract client data
+7. Download client data
 8. Configure MySQL
 9. Configure AzerothCore
 10. Initialize databases
@@ -241,7 +249,7 @@ The rest of this guide explains each step.
 
 ---
 
-# 5. Install Build Dependencies
+# Install Build Dependencies
 
 Update Ubuntu's package lists:
 
@@ -338,7 +346,7 @@ If these commands return version information, continue.
 
 ---
 
-# 6. Download AzerothCore
+# Download AzerothCore
 
 Move to your home directory:
 
@@ -381,7 +389,7 @@ This is useful when troubleshooting because AzerothCore and its modules are acti
 
 ---
 
-# 7. Install Modules
+# Install Modules
 
 AzerothCore modules are stored under:
 
@@ -441,53 +449,8 @@ This ensures that dependencies stored as Git submodules are available.
 
 ---
 
-# 8. Patch jemalloc
 
-The current build may require a small change to jemalloc.
-
-Navigate to the source:
-
-```bash
-cd ~/azerothcore-wotlk/deps/jemalloc/src
-```
-
-Open the file:
-
-```bash
-nano jemalloc_cpp.cpp
-```
-
-Find:
-
-```cpp
-std::__throw_bad_alloc();
-```
-
-Replace it with:
-
-```cpp
-std::bad_alloc();
-```
-
-Save the file:
-
-```text
-Ctrl+O
-Enter
-Ctrl+X
-```
-
-You can verify the change with:
-
-```bash
-grep -n "bad_alloc" jemalloc_cpp.cpp
-```
-
-> **Important:** This is a workaround for the current source/dependency combination. If a future AzerothCore update no longer contains the problematic code, do not blindly apply this modification.
-
----
-
-# 9. Build AzerothCore
+# Build AzerothCore
 
 Return to the project directory:
 
@@ -517,11 +480,11 @@ ls -lh ~/azerothcore-wotlk/env/dist/bin/
 
 You should see the generated server executables.
 
-If the build fails, do not immediately continue to the database setup. See the [Troubleshooting](#28-troubleshooting) section and inspect the build error.
+If the build fails, do not immediately continue to the database setup. See the [Troubleshooting](#troubleshooting) section and inspect the build error.
 
 ---
 
-# 10. Extract Client Data
+# Download Client Data
 
 AzerothCore requires data extracted from a compatible WotLK client.
 
@@ -539,7 +502,7 @@ Run:
 
 Follow the prompts.
 
-The extracted data is used by the world server for things such as:
+The downloaded data is used by the world server for things such as:
 
 * Maps
 * DBC files
@@ -548,11 +511,10 @@ The extracted data is used by the world server for things such as:
 * VMaps
 * MMaps
 
-> **Important:** The server does not provide the WoW client itself. You need a compatible WotLK client separately.
 
 ---
 
-# 11. Configure MySQL
+# Configure MySQL
 
 AzerothCore stores server data in MySQL.
 
@@ -566,7 +528,7 @@ acore_world
 
 ---
 
-## 11.1 Check MySQL
+## Check MySQL
 
 Check the service:
 
@@ -600,7 +562,7 @@ sudo systemctl enable mysql
 
 ---
 
-# 12. Configure `secure-file-priv`
+# Configure `secure-file-priv`
 
 Create the MySQL secure file directory:
 
@@ -653,7 +615,7 @@ active (running)
 
 ---
 
-# 13. Create the `acore` MySQL User
+# Create the `acore` MySQL User
 
 Open MySQL:
 
@@ -718,7 +680,7 @@ AzerothCore configuration can use either connection form, so creating both avoid
 
 ---
 
-# 14. Run MySQL's Security Script
+# Run MySQL's Security Script
 
 Run:
 
@@ -732,7 +694,7 @@ This can be used to remove unnecessary/default MySQL configuration and improve t
 
 ---
 
-# 15. Configure AzerothCore
+# Configure AzerothCore
 
 AzerothCore's generated configuration files are located under:
 
@@ -773,13 +735,13 @@ Make sure the password is correct.
 
 ---
 
-# 16. Create the AzerothCore Databases
+# Create the AzerothCore Databases
 
 AzerothCore can initialize its databases when the server is first started.
 
 ---
 
-## 16.1 Initialize the Auth Database
+## Initialize the Auth Database
 
 Run:
 
@@ -804,7 +766,7 @@ Ctrl+C
 
 ---
 
-# 17. Configure the Realm Address
+# Configure the Realm Address
 
 The realm address tells clients where they should connect to the world server.
 
@@ -854,7 +816,7 @@ mysql -u acore -pMyPassword \
 
 ---
 
-# 18. Initialize the World and Characters Databases
+# Initialize the World and Characters Databases
 
 Start the world server:
 
@@ -877,7 +839,7 @@ This allows the world server to shut down cleanly.
 
 ---
 
-# 19. Create a Player Account
+# Create a Player Account
 
 You can create accounts from the worldserver console.
 
@@ -916,7 +878,7 @@ You can now use this account from the WoW client.
 
 ---
 
-# 20. Create an Admin Account
+# Create an Admin Account
 
 It is recommended to keep your normal player account separate from your GM account.
 
@@ -938,7 +900,7 @@ GM level 3 provides high-level administrative access.
 
 ---
 
-# 21. Configure Playerbot
+# Configure Playerbot
 
 Playerbot is one of the main reasons for using the `mod-playerbots` branch.
 
@@ -993,7 +955,7 @@ If the server becomes slow:
 
 ---
 
-# 22. Enable Other Modules
+# Enable Other Modules
 
 AzerothCore modules are generally configured under:
 
@@ -1025,7 +987,7 @@ Always read the module's documentation before enabling it.
 
 ---
 
-# 23. Configure AuctionBot
+# Configure AuctionBot
 
 AuctionBot is optional.
 
@@ -1035,7 +997,7 @@ The exact configuration depends on the AHBot module version included in your bui
 
 ---
 
-## 23.1 Create the AuctionBot account
+## Create the AuctionBot Account
 
 Open MySQL:
 
@@ -1063,8 +1025,8 @@ INSERT INTO account (
     expansion
 ) VALUES (
     'AuctionBot',
-    UNHEX('00...00'),
-    UNHEX('00...00'),
+    UNHEX('0000000000000000000000000000000000000000000000000000000000000000'),
+    UNHEX('00000000000000000000000000000000'),
     NULL,
     NULL,
     'auctionbot@example.com',
@@ -1087,7 +1049,7 @@ Write down the returned `account_id`.
 
 ---
 
-# 24. Create the AuctionBot Character
+# Create the AuctionBot Character
 
 Select the characters database:
 
@@ -1188,7 +1150,7 @@ For a personal server, it is generally sufficient when performed carefully.
 
 ---
 
-# 25. Configure AHBot
+# Configure AHBot
 
 Open the AHBot configuration:
 
@@ -1210,7 +1172,7 @@ Restart the worldserver after changing module configuration.
 
 ---
 
-# 26. LAN vs Internet Servers
+# LAN vs Internet Servers
 
 There are three common ways to connect to your server.
 
@@ -1277,7 +1239,7 @@ In that case, clients use the VPN address of the server.
 
 ---
 
-# 27. Firewall Configuration
+# Firewall Configuration
 
 If you are using UFW, first make sure SSH is allowed:
 
@@ -1344,7 +1306,7 @@ The exact router interface varies by manufacturer.
 
 ---
 
-# 28. Configure the WoW Client
+# Configure the WoW Client
 
 Locate the client's:
 
@@ -1405,7 +1367,7 @@ Password: <PASSWORD>
 
 ---
 
-# 29. Verify the Installation
+# Verify the Installation
 
 Before troubleshooting, verify each component independently.
 
@@ -1485,7 +1447,7 @@ If the services are listening, the next step is testing connectivity from the cl
 
 ---
 
-# 30. Using `screen`
+# Using `screen`
 
 For a simple server that you start manually, `screen` is convenient.
 
@@ -1575,7 +1537,7 @@ screen -r worldserver
 
 ---
 
-# 31. systemd Services
+# systemd Services
 
 `screen` is convenient for testing, but `systemd` is generally better for a server that should automatically start after reboot.
 
@@ -1630,7 +1592,7 @@ journalctl -u azerothcore-world -f
 
 ---
 
-# 32. Backing Up the Server
+# Backing Up the Server
 
 Once your server is working, **back it up before making major changes**.
 
@@ -1677,7 +1639,7 @@ If you have custom server content, back that up as well.
 
 ---
 
-# 33. Updating AzerothCore
+# Updating AzerothCore
 
 AzerothCore and its modules change over time.
 
@@ -1740,7 +1702,7 @@ Do not assume that every future revision can be updated using the exact same Git
 
 ---
 
-# 34. Troubleshooting
+# Troubleshooting
 
 ## AzerothCore will not compile
 
@@ -1765,18 +1727,6 @@ The useful error is usually earlier in the output.
 
 ---
 
-## jemalloc error
-
-Check whether the problematic symbol exists:
-
-```bash
-grep -n "__throw_bad_alloc" \
-    ~/azerothcore-wotlk/deps/jemalloc/src/jemalloc_cpp.cpp
-```
-
-If it exists, verify that the source was changed according to the jemalloc section.
-
----
 
 ## MySQL will not start
 
@@ -1944,7 +1894,7 @@ Verify:
 
 ---
 
-# 35. Performance Considerations
+# Performance Considerations
 
 AzerothCore performance depends on:
 
@@ -1989,7 +1939,7 @@ If performance becomes poor, reduce the number of active bots before assuming th
 
 ---
 
-# 36. Security Notes
+# Security Notes
 
 ## Do not expose MySQL
 
@@ -2057,7 +2007,7 @@ and do not configure router port forwarding.
 
 ---
 
-# 37. Useful Commands
+# Useful Commands
 
 ## Start authserver
 
@@ -2080,7 +2030,7 @@ cd ~/azerothcore-wotlk
 ./acore.sh compiler all
 ```
 
-## Extract client data
+## Download client data
 
 ```bash
 cd ~/azerothcore-wotlk
@@ -2132,7 +2082,7 @@ git rev-parse --short HEAD
 
 ---
 
-# 38. Final Checklist
+# Final Checklist
 
 Before considering the installation complete, verify:
 
@@ -2142,9 +2092,8 @@ Before considering the installation complete, verify:
 [ ] AzerothCore Playerbot branch is cloned
 [ ] Modules are installed
 [ ] Git submodules are initialized
-[ ] jemalloc workaround applied if required
 [ ] AzerothCore compiled successfully
-[ ] Client data extracted
+[ ] Client data downloaded
 [ ] MySQL is running
 [ ] MySQL secure-file-priv is configured
 [ ] acore MySQL user exists
@@ -2168,6 +2117,38 @@ Before considering the installation complete, verify:
 [ ] Playerbots work
 [ ] Backups have been created
 ```
+
+---
+
+---
+
+
+# Glossary
+
+| Term | Meaning |
+| --- | --- |
+| **AHBot** | AzerothCore's Auction House bot functionality, used to automatically populate the Auction House with listings. |
+| **AzerothCore** | The server software used to run a Wrath of the Lich King game server. |
+| **Auth Server** | The server component responsible for handling client authentication and login. |
+| **`acore_auth`** | MySQL database containing authentication and account-related data. |
+| **`acore_characters`** | MySQL database containing character data. |
+| **`acore_world`** | MySQL database containing world/game data. |
+| **`acore`** | The MySQL user created for AzerothCore's database connections. |
+| **Client Data** | Game data used by the world server, including maps, DBC files, VMaps, and MMaps. |
+| **GM** | Game Master; an account with elevated administrative privileges on the server. |
+| **GUID** | A unique identifier used for game objects such as characters. |
+| **LAN** | Local Area Network; a private network used by devices in the same local network. |
+| **MMaps** | Movement map data used by the server for navigation and movement calculations. |
+| **Module** | An optional extension that adds functionality to AzerothCore. |
+| **MySQL** | The database server used by AzerothCore to store authentication, character, and world data. |
+| **Playerbot** | A module/project that allows computer-controlled player characters to participate in the game. |
+| **Realm Address** | The IP address or hostname stored by AzerothCore that tells clients where to connect to a realm. |
+| **`realmlist.wtf`** | The WoW client configuration file containing the server address used for login. |
+| **`secure-file-priv`** | A MySQL security setting that restricts file import/export operations to an approved directory. |
+| **UFW** | Uncomplicated Firewall, a firewall management tool commonly used on Ubuntu. |
+| **VMaps** | Visibility and collision map data used by the world server. |
+| **VPN** | Virtual Private Network; a private network connection that can be used to connect remote clients to the server. |
+| **World Server** | The server component responsible for running the game world, including maps, NPCs, quests, combat, characters, Playerbots, and modules. |
 
 ---
 
