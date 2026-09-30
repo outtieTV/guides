@@ -3,6 +3,9 @@
 **A guide to setting up a 2009scape RuneScape private server for LAN play with family and friends**
 
 > **Guide scope:** This guide focuses on running 2009scape on a **local network (LAN)**. It does not require port forwarding or exposing the server to the public Internet.
+<br />
+I made this into a YouTube video! Check it out: https://youtu.be/bkn0ksctKxc
+<br />
 
 ---
 
