@@ -6,92 +6,92 @@
 
 ## Table of Contents
 
-* [1. Introduction](#1-introduction)
+* [Introduction](#1-introduction)
 
   * [What This Guide Covers](#what-this-guide-covers)
   * [What This Guide Assumes](#what-this-guide-assumes)
   * [Development vs. Production](#development-vs-production)
-* [2. Server Architecture](#2-server-architecture)
+* [Server Architecture](#2-server-architecture)
 
   * [Component Overview](#component-overview)
   * [Startup Order](#startup-order)
   * [How a Login Works](#how-a-login-works)
-* [3. Requirements](#3-requirements)
+* [Requirements](#3-requirements)
 
   * [Software](#software)
   * [Server Files](#server-files)
   * [Client Files](#client-files)
   * [Recommended Tools](#recommended-tools)
-* [4. Recommended Directory Layout](#4-recommended-directory-layout)
-* [5. Preparing Windows](#5-preparing-windows)
+* [Recommended Directory Layout](#4-recommended-directory-layout)
+* [Preparing Windows](#5-preparing-windows)
 
   * [SQL Server](#sql-server)
   * [Manual File Preparation](#manual-file-preparation)
   * [Symbolic Links](#symbolic-links)
-* [6. Database Installation](#6-database-installation)
+* [Database Installation](#6-database-installation)
 
   * [SQL Server Configuration](#sql-server-configuration)
   * [Restoring Databases](#restoring-databases)
   * [Logical File Names](#logical-file-names)
   * [Database Connection Configuration](#database-connection-configuration)
-* [7. Server Configuration](#7-server-configuration)
+* [Server Configuration](#7-server-configuration)
 
   * [XMLDB](#xmldb)
   * [Authenticator](#authenticator)
   * [DB_XMLServer](#db_xmlserver)
   * [Configuration File Reference](#configuration-file-reference)
-* [8. Client Configuration](#8-client-configuration)
+* [Client Configuration](#8-client-configuration)
 
   * [Language Files](#language-files)
   * [UI Upload Service](#ui-upload-service)
   * [Client URLs](#client-urls)
-* [9. Starting the Server](#9-starting-the-server)
+* [Starting the Server](#9-starting-the-server)
 
   * [Startup Order](#startup-order-1)
   * [startall.bat](#startallbat)
   * [First Boot Checklist](#first-boot-checklist)
-* [10. Accounts and GameMaster Setup](#10-accounts-and-gamemaster-setup)
+* [Accounts and GameMaster Setup](#10-accounts-and-gamemaster-setup)
 
   * [NPC Account](#npc-account)
   * [GameMaster Account](#gamemaster-account)
   * [Creating a Player](#creating-a-player)
-* [11. NPCClient Initialization](#11-npcclient-initialization)
-* [12. Translation and Language Packs](#12-translation-and-language-packs)
+* [NPCClient Initialization](#11-npcclient-initialization)
+* [Translation and Language Packs](#12-translation-and-language-packs)
 
   * [Understanding Language Packs](#understanding-language-packs)
   * [Extraction](#extraction)
   * [Merging Localized Data](#merging-localized-data)
   * [Repacking](#repacking)
   * [Installing the Finished Pack](#installing-the-finished-pack)
-* [13. Server Administration](#13-server-administration)
+* [Server Administration](#13-server-administration)
 
   * [Server Startup and Shutdown](#server-startup-and-shutdown)
   * [Server and Channel Names](#server-and-channel-names)
   * [Database Maintenance](#database-maintenance)
   * [Removing a Corrupt Item](#removing-a-corrupt-item)
   * [Database Backups](#database-backups)
-* [14. Modifying Game Data](#14-modifying-game-data)
+* [Modifying Game Data](#14-modifying-game-data)
 
   * [XML Data](#xml-data)
   * [Scripts](#scripts)
   * [Skills](#skills)
   * [Events](#events)
   * [Client Binary Modifications](#client-binary-modifications)
-* [15. Reverse Engineering and Development Tools](#15-reverse-engineering-and-development-tools)
-* [16. Networking](#16-networking)
-* [17. Troubleshooting](#17-troubleshooting)
+* [Reverse Engineering and Development Tools](#15-reverse-engineering-and-development-tools)
+* [Networking](#16-networking)
+* [Troubleshooting](#17-troubleshooting)
 
   * [Troubleshooting Method](#troubleshooting-method)
   * [Server Does Not Start](#server-does-not-start)
   * [World Does Not Load](#world-does-not-load)
   * [NPCs Are Delayed](#npcs-are-delayed)
   * [Client Does Not Launch](#client-does-not-launch)
-* [18. Known Bugs and Limitations](#18-known-bugs-and-limitations)
-* [19. Version Compatibility](#19-version-compatibility)
-* [20. Quick Reference](#20-quick-reference)
-* [21. Appendix: Steam Client Extraction](#21-appendix-steam-client-extraction)
-* [22. Appendix: Legacy SQL Server Installation](#22-appendix-legacy-sql-server-installation)
-* [23. Changelog](#23-changelog)
+* [Known Bugs and Limitations](#18-known-bugs-and-limitations)
+* [Version Compatibility](#19-version-compatibility)
+* [Quick Reference](#20-quick-reference)
+* [Appendix: Steam Client Extraction](#21-appendix-steam-client-extraction)
+* [Appendix: Legacy SQL Server Installation](#22-appendix-legacy-sql-server-installation)
+* [Changelog](#23-changelog)
 
 ---
 
@@ -936,7 +936,7 @@ If exposing it to untrusted users, additional validation and security controls s
 Open the client package:
 
 ```text
-ProjectM200JPClient\Client\package\198_full.pack
+243_C\Client\package\198_full.pack
 ```
 
 Use MabiPacker's **Unpack** functionality.
@@ -959,7 +959,7 @@ DownloadUIAddress="http://127.0.0.1/ui/"
 Save the modified file to:
 
 ```text
-ProjectM200JPClient\Client\data\db\urls.xml
+243_C\Client\data\db\urls.xml
 ```
 
 ---
