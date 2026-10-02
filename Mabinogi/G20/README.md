@@ -56,6 +56,7 @@
   * [GameMaster Account](#gamemaster-account)
   * [Creating a Player](#creating-a-player)
 * [NPCClient Initialization](#11-npcclient-initialization)
+* [Housing Server](#housing-server)
 * [Translation and Language Packs](#12-translation-and-language-packs)
 
   * [Understanding Language Packs](#understanding-language-packs)
@@ -1175,6 +1176,191 @@ SYS> ---------- Processing-Commands End ----------
 ```
 
 This indicates that the expected processing initialization stage has completed.
+
+---
+
+# Housing Server
+
+The housing server can be added by running a second copy of the `GameServer` and a second `NPCClient`. The housing server uses its own world name, ports, and NPC account so it can operate alongside the normal game server.
+
+## Duplicate the Server Folders
+
+1. Duplicate the `GameServer` folder.
+2. Rename the duplicate to `GameServer_House`.
+3. Duplicate the `NpcClient` folder.
+4. Rename the duplicate to `NpcClient_House`.
+
+The resulting directories should contain both the normal and housing instances:
+
+```text
+GameServer
+GameServer_House
+NpcClient
+NpcClient_House
+```
+
+The original folders continue to be used for the normal world. The duplicated folders are used only for the housing server.
+
+## Configure `GameServer_House`
+
+Open:
+
+```text
+GameServer_House\ServerInfo.ini
+```
+
+Change the server name from `TEST_WORLD` to `house` and use the housing server ports:
+
+```ini
+[SYSTEM]
+; don't edit in demo server
+SERVER_NAME = house
+; your server port , editable
+SERVER_PORT = 11021
+; your server port for npc, editable
+SERVER_PORT_NPC = 11023
+```
+
+The important values are:
+
+| Setting | Housing value | Purpose |
+| --- | --- | --- |
+| `SERVER_NAME` | `house` | Identifies the housing world/server. |
+| `SERVER_PORT` | `11021` | Housing GameServer port. |
+| `SERVER_PORT_NPC` | `11023` | Housing NPC port. |
+
+Do not change the original `GameServer\ServerInfo.ini` when configuring the housing server. The housing settings belong in `GameServer_House`.
+
+## Create the Housing NPC Account
+
+Create a second NPC account named `npc2` using the same account-creation process used for the original NPC account. Use the following credentials for the housing NPCClient:
+
+```text
+Account: npc2
+Password: fpswl
+```
+
+The housing NPCClient uses `npc2` so it can run alongside the normal NPCClient without reusing the original NPC account.
+
+## Configure `NpcClient_House`
+
+Open:
+
+```text
+NpcClient_House\NPCClient.xml
+```
+
+Set the account to `npc2` and the multiserver name to `house`. The housing configuration should be:
+
+```xml
+<?xml version="1.0" encoding="EUC-KR" ?> 
+<npcclient> 
+	<maxcpu>true</maxcpu> 
+	<autoprocess>true</autoprocess> 
+	<savelog>true</savelog> 
+	<safetime>1200000</safetime> 
+	<safefps>1</safefps> 
+	<asyncnetwork>true</asyncnetwork> 
+	
+	<account>npc2</account> 
+	<password>fpswl</password> 
+	<servergroup>mabilocalserver</servergroup> 
+	<multiserver>house</multiserver> 
+</npcclient> 
+```
+
+For `NpcClient_House`, remove all `<batch_jobs>` and `<commands>` entries from `NPCClient.xml`. The housing configuration should contain the NPCClient settings and login information, but no batch-job or command blocks.
+
+The normal `NpcClient\NPCClient.xml` remains unchanged and continues to use the original NPC account and configuration.
+
+## Update `start-all.bat`
+
+Add the housing GameServer immediately after the normal `GameServer`, and add the housing NPCClient immediately after the normal `NPCClient`. A complete `start-all.bat` for the two-server setup is:
+
+```batch
+@echo off
+cd DB_XMLServer
+start XMLDB.exe
+pause
+cd ..
+cd Authenticator
+start Authenticator_Console.exe 
+pause
+cd ..
+cd LoginServer
+start LoginServer2_64.exe setting:"file://data/features.xml=Regular, China" sublocale:ServerGroup09
+pause
+cd ..
+cd Coordinator
+start Coordinator.exe
+pause
+cd ..
+cd GameServer
+start GameServer_64.exe setting:"file://data/features.xml=Regular, China" sublocale:ServerGroup09
+pause
+cd ..
+cd GameServer_House
+start GameServer_64.exe setting:"file://data/features.xml=Regular, China" sublocale:ServerGroup09
+pause
+cd ..
+cd NPCClient
+start ClientD.exe code:1215 logip:127.0.0.1 logport:11000 chatip:127.0.0.1 chatport:8002 render:no setting:"file://data/features.xml=Regular, China" npcbatchjob:default sublocale:ServerGroup09
+pause
+cd ..
+cd NPCClient_House
+start ClientD.exe code:1215 logip:127.0.0.1 logport:11000 chatip:127.0.0.1 chatport:8002 render:no setting:"file://data/features.xml=Regular, China" npcbatchjob:default sublocale:ServerGroup09
+pause
+cd ..
+cd MessengerServer
+start MabiMessengerServer.exe
+exit
+```
+
+The startup sequence is therefore:
+
+```text
+DB_XMLServer
+    ↓
+Authenticator
+    ↓
+LoginServer
+    ↓
+Coordinator
+    ↓
+GameServer
+    ↓
+GameServer_House
+    ↓
+NPCClient
+    ↓
+NPCClient_House
+    ↓
+MessengerServer
+```
+
+Allow each service to initialize before continuing to the next service, especially the normal `GameServer` and `NPCClient` before starting their housing counterparts.
+
+## Housing Server Checklist
+
+Before testing housing, verify:
+
+```text
+[ ] GameServer_House was duplicated from GameServer
+[ ] NpcClient_House was duplicated from NpcClient
+[ ] GameServer_House\ServerInfo.ini exists
+[ ] SERVER_NAME = house
+[ ] SERVER_PORT = 11021
+[ ] SERVER_PORT_NPC = 11023
+[ ] NPC account npc2 exists
+[ ] NpcClient_House\NPCClient.xml uses npc2
+[ ] NpcClient_House\NPCClient.xml uses multiserver house
+[ ] NpcClient_House\NPCClient.xml has no <batch_jobs> entries
+[ ] NpcClient_House\NPCClient.xml has no <commands> entries
+[ ] start-all.bat starts GameServer_House
+[ ] start-all.bat starts NpcClient_House
+```
+
+The normal and housing services should use separate server names, ports, and NPC accounts.
 
 ---
 
