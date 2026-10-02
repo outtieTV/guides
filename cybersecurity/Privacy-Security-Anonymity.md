@@ -8,28 +8,28 @@
 
 ## Table of Contents
 
-* [1. Privacy, Security, and Anonymity](#1-privacy-security-and-anonymity)
-* [2. Start With Your Threat Model](#2-start-with-your-threat-model)
-* [3. How You Can Be Identified](#3-how-you-can-be-identified)
-* [4. Network Privacy](#4-network-privacy)
-* [5. Browser Privacy](#5-browser-privacy)
-* [6. Accounts and Online Identity](#6-accounts-and-online-identity)
-* [7. Operating System Privacy](#7-operating-system-privacy)
-* [8. Search, Email, and Communication](#8-search-email-and-communication)
-* [9. Cloud Storage and Personal Data](#9-cloud-storage-and-personal-data)
-* [10. File and Device Encryption](#10-file-and-device-encryption)
-* [11. Tor and Anonymity](#11-tor-and-anonymity)
-* [12. Self-Hosting](#12-self-hosting)
-* [13. Privacy-Friendly Software](#13-privacy-friendly-software)
-* [14. Things That Can De-Anonymize You](#14-things-that-can-de-anonymize-you)
-* [15. Common Mistakes](#15-common-mistakes)
-* [16. Practical Privacy Checklist](#16-practical-privacy-checklist)
-* [17. Suggested Privacy Levels](#17-suggested-privacy-levels)
-* [18. Further Reading](#18-further-reading)
+* [Privacy, Security, and Anonymity](#privacy-security-and-anonymity)
+* [Start With Your Threat Model](#start-with-your-threat-model)
+* [How You Can Be Identified](#how-you-can-be-identified)
+* [Network Privacy](#network-privacy)
+* [Browser Privacy](#browser-privacy)
+* [Accounts and Online Identity](#accounts-and-online-identity)
+* [Operating System Privacy](#operating-system-privacy)
+* [Search, Email, and Communication](#search-email-and-communication)
+* [Cloud Storage and Personal Data](#cloud-storage-and-personal-data)
+* [File and Device Encryption](#file-and-device-encryption)
+* [Tor and Anonymity](#tor-and-anonymity)
+* [Self-Hosting](#self-hosting)
+* [Privacy-Friendly Software](#privacy-friendly-software)
+* [Things That Can De-Anonymize You](#things-that-can-de-anonymize-you)
+* [Common Mistakes](#common-mistakes)
+* [Practical Privacy Checklist](#practical-privacy-checklist)
+* [Suggested Privacy Levels](#suggested-privacy-levels)
+* [Further Reading](#further-reading)
 
 ---
 
-# 1. Privacy, Security, and Anonymity
+# Privacy, Security, and Anonymity
 
 These terms are related, but they describe different goals.
 
@@ -73,7 +73,7 @@ A VPN can improve network privacy, but **a VPN by itself does not make you anony
 
 ---
 
-# 2. Start With Your Threat Model
+# Start With Your Threat Model
 
 Before installing privacy software, decide what you are actually trying to protect against.
 
@@ -99,7 +99,7 @@ For ordinary users, preventing advertising tracking and securing accounts may be
 
 ---
 
-# 3. How You Can Be Identified
+# How You Can Be Identified
 
 There are many different pieces of information that can be combined to identify or track someone.
 
@@ -337,7 +337,7 @@ A photograph can potentially identify a location even after EXIF metadata has be
 
 ---
 
-# 4. Network Privacy
+# Network Privacy
 
 ## Use HTTPS
 
@@ -413,7 +413,7 @@ When using an untrusted network:
 
 ---
 
-# 5. Browser Privacy
+# Browser Privacy
 
 ## Choose a Privacy-Conscious Browser
 
@@ -484,7 +484,7 @@ It should not be treated as a required modern privacy extension.
 
 ---
 
-# 6. Accounts and Online Identity
+# Accounts and Online Identity
 
 One of the easiest ways to destroy anonymity is to log into an account that identifies you.
 
@@ -531,7 +531,7 @@ Use:
 
 ---
 
-# 7. Operating System Privacy
+# Operating System Privacy
 
 Your operating system is one of the most trusted pieces of software on your computer.
 
@@ -602,7 +602,7 @@ Privacy-conscious users should review which services are enabled rather than ass
 
 ---
 
-# 8. Search, Email, and Communication
+# Search, Email, and Communication
 
 ## Search Engines
 
@@ -623,7 +623,7 @@ https://docs.searxng.org/
 
 ---
 
-# 9. Email
+# Email
 
 Email is inherently difficult to make completely private because messages may pass through multiple providers.
 
@@ -642,7 +642,7 @@ Remember that encryption does not eliminate metadata such as:
 
 ---
 
-# 10. Cloud Storage and Personal Data
+# Cloud Storage and Personal Data
 
 Large cloud ecosystems can become repositories for enormous amounts of personal information.
 
@@ -722,7 +722,7 @@ Self-hosting trades **provider trust** for **administrator responsibility**.
 
 ---
 
-# 11. Messaging
+# Messaging
 
 ## Element
 
@@ -736,7 +736,7 @@ For users looking to reduce dependence on centralized messaging ecosystems, Elem
 
 ---
 
-# 12. Encrypt Cloud Storage
+# Encrypt Cloud Storage
 
 If you must use a third-party cloud provider, consider encrypting sensitive files before uploading them.
 
@@ -765,7 +765,7 @@ The provider stores encrypted data rather than the original files.
 
 ---
 
-# 13. Encrypt Local and External Drives
+# Encrypt Local and External Drives
 
 For sensitive local storage, consider full-disk or container encryption.
 
@@ -788,7 +788,7 @@ A randomly generated password or a strong multi-word passphrase is preferable to
 
 ---
 
-# 14. Tor and Anonymity
+# Tor and Anonymity
 
 ## What Tor Does
 
@@ -856,7 +856,7 @@ The fact that multiple users share the same Tor exit node does not, by itself, i
 
 ---
 
-# 15. Amnesic Operating Systems
+# Amnesic Operating Systems
 
 ## Tails
 
@@ -879,7 +879,7 @@ However, it is not magic. You can still identify yourself through:
 
 ---
 
-# 16. Self-Hosting
+# Self-Hosting
 
 Self-hosting can reduce dependence on large centralized providers.
 
@@ -916,7 +916,7 @@ If you self-host:
 
 ---
 
-# 17. Things That Can De-Anonymize You
+# Things That Can De-Anonymize You
 
 The following should be considered when attempting to maintain anonymity:
 
@@ -952,7 +952,7 @@ The following should be considered when attempting to maintain anonymity:
 
 ---
 
-# 18. Common Mistakes
+# Common Mistakes
 
 ## "I use a VPN, so I'm anonymous."
 
@@ -1022,7 +1022,7 @@ Use the smallest set of tools that meets your requirements.
 
 ---
 
-# 19. Practical Privacy Checklist
+# Practical Privacy Checklist
 
 ## Basic Privacy
 
@@ -1103,7 +1103,7 @@ If using third-party cloud storage:
 
 ---
 
-# 20. Suggested Privacy Levels
+# Suggested Privacy Levels
 
 Not everyone needs the same setup.
 
@@ -1175,7 +1175,7 @@ A technical mistake can undo an otherwise sophisticated setup.
 
 ---
 
-# 21. Privacy vs. Convenience
+# Privacy vs. Convenience
 
 There is no completely free privacy solution.
 
@@ -1207,7 +1207,7 @@ The correct choice depends on what you value and what threats you are attempting
 
 ---
 
-# 22. Recommended Tools
+# Recommended Tools
 
 | Purpose                     | Tool                                |
 | --------------------------- | ----------------------------------- |
@@ -1229,46 +1229,46 @@ Always verify the current status of a project before adopting it. Privacy softwa
 
 ---
 
-# 23. Final Principles
+# Final Principles
 
 If you remember nothing else from this guide, remember these:
 
-### 1. Minimize the data you create.
+### Minimize the data you create.
 
 The easiest data to protect is data that was never collected.
 
-### 2. Don't put everything under one identity.
+### Don't put everything under one identity.
 
 Separating accounts and identities can make correlation more difficult.
 
-### 3. Don't trust a privacy tool blindly.
+### Don't trust a privacy tool blindly.
 
 A VPN, browser, operating system, or messaging application becomes another piece of software that you must trust.
 
-### 4. Encryption protects data; it doesn't necessarily hide metadata.
+### Encryption protects data; it doesn't necessarily hide metadata.
 
 Who you communicate with, when you communicate, and how much data is transferred can still matter.
 
-### 5. Anonymity is partly behavioral.
+### Anonymity is partly behavioral.
 
 A VPN or Tor cannot prevent you from identifying yourself.
 
-### 6. Security comes before anonymity.
+### Security comes before anonymity.
 
 A compromised computer can potentially bypass many privacy measures.
 
-### 7. Keep everything updated.
+### Keep everything updated.
 
 An outdated privacy tool is still vulnerable software.
 
-### 8. Back up important data.
+### Back up important data.
 
 Privacy is not useful if a hardware failure destroys your only copy.
 
-### 9. Use the least complicated setup that meets your threat model.
+### Use the least complicated setup that meets your threat model.
 
 Complexity creates opportunities for mistakes.
 
-### 10. There is no such thing as perfect anonymity.
+### There is no such thing as perfect anonymity.
 
 The goal is to **reduce unnecessary exposure and make unwanted tracking, profiling, and identification more difficult.**
