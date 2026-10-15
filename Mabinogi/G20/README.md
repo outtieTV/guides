@@ -1,6 +1,9 @@
 # Mabinogi G20 Private Server Guide
 
 > A practical guide to deploying, configuring, translating, administering, modifying, and troubleshooting a Mabinogi Generation 20 (G20) private server environment.
+<br />
+
+I made this into a YouTube video! Check it out: https://youtu.be/KW8T--g6RHU
 
 ---
 
